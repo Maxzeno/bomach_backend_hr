@@ -19,6 +19,16 @@ from .job_posting import (
     JobPostingListItemSchema,
     MessageSchema,
 )
+from .applicant import (
+    ApplicantCreateSchema,
+    ApplicantUpdateSchema,
+    ApplicantStageUpdateSchema,
+    ApplicantStatusUpdateSchema,
+    ApplicantRatingUpdateSchema,
+    ApplicantMinimalSchema,
+    ApplicantResponseSchema,
+    ApplicantListItemSchema,
+)
 
 __all__ = [
     'PaginatedResponse',
@@ -36,4 +46,12 @@ __all__ = [
     'JobPostingResponseSchema',
     'JobPostingListItemSchema',
     'MessageSchema',
+    'ApplicantCreateSchema',
+    'ApplicantUpdateSchema',
+    'ApplicantStageUpdateSchema',
+    'ApplicantStatusUpdateSchema',
+    'ApplicantRatingUpdateSchema',
+    'ApplicantMinimalSchema',
+    'ApplicantResponseSchema',
+    'ApplicantListItemSchema',
 ]

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Department, SubDepartment, JobPosting
+from .models import Department, SubDepartment, JobPosting, Applicant
 
 
 @admin.register(Department)
@@ -71,6 +71,47 @@ class JobPostingAdmin(admin.ModelAdmin):
         }),
         ('Statistics', {
             'fields': ('applicants_count',),
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(Applicant)
+class ApplicantAdmin(admin.ModelAdmin):
+    list_display = [
+        'application_id',
+        'full_name',
+        'email',
+        'phone',
+        'job_posting',
+        'rating',
+        'stage',
+        'status',
+        'created_at',
+    ]
+    list_filter = ['stage', 'status', 'job_posting', 'created_at']
+    search_fields = ['application_id', 'first_name', 'last_name', 'email', 'phone']
+    readonly_fields = ['application_id', 'created_at', 'updated_at']
+    list_editable = ['stage', 'status', 'rating']
+    ordering = ['-created_at']
+    date_hierarchy = 'created_at'
+    autocomplete_fields = ['job_posting']
+
+    fieldsets = (
+        ('Application Info', {
+            'fields': ('application_id', 'job_posting')
+        }),
+        ('Personal Information', {
+            'fields': ('first_name', 'last_name', 'email', 'phone')
+        }),
+        ('Application Status', {
+            'fields': ('stage', 'status', 'rating')
+        }),
+        ('Documents & Notes', {
+            'fields': ('resume', 'cover_letter', 'notes')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

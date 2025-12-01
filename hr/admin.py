@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Department, SubDepartment, JobPosting, Applicant
+from .models import Department, SubDepartment, JobPosting, Applicant, LeaveRequest
 
 
 @admin.register(Department)
@@ -112,6 +112,46 @@ class ApplicantAdmin(admin.ModelAdmin):
         }),
         ('Documents & Notes', {
             'fields': ('resume', 'cover_letter', 'notes')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(LeaveRequest)
+class LeaveRequestAdmin(admin.ModelAdmin):
+    list_display = [
+        'employee_id',
+        'employee_name',
+        'leave_type',
+        'start_date',
+        'end_date',
+        'status',
+        'duration_days',
+        'created_at',
+    ]
+    list_filter = ['status', 'leave_type', 'start_date', 'created_at']
+    search_fields = ['employee_id', 'employee_name', 'employee_email', 'reason']
+    readonly_fields = ['created_at', 'updated_at', 'duration_days']
+    list_editable = ['status']
+    ordering = ['-created_at']
+    date_hierarchy = 'start_date'
+
+    fieldsets = (
+        ('Employee Information', {
+            'fields': ('employee_id', 'employee_name', 'employee_email')
+        }),
+        ('Leave Details', {
+            'fields': ('leave_type', 'start_date', 'end_date', 'reason', 'duration_days')
+        }),
+        ('Status', {
+            'fields': ('status',)
+        }),
+        ('Approval Information', {
+            'fields': ('approver_id', 'approval_date', 'rejection_reason'),
+            'classes': ('collapse',)
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

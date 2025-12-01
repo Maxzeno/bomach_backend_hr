@@ -29,6 +29,13 @@ from .applicant import (
     ApplicantResponseSchema,
     ApplicantListItemSchema,
 )
+from .leave_request import (
+    LeaveRequestCreateSchema,
+    LeaveRequestUpdateSchema,
+    LeaveRequestStatusUpdateSchema,
+    LeaveRequestResponseSchema,
+    LeaveRequestListItemSchema,
+)
 
 __all__ = [
     'PaginatedResponse',
@@ -54,4 +61,9 @@ __all__ = [
     'ApplicantMinimalSchema',
     'ApplicantResponseSchema',
     'ApplicantListItemSchema',
+    'LeaveRequestCreateSchema',
+    'LeaveRequestUpdateSchema',
+    'LeaveRequestStatusUpdateSchema',
+    'LeaveRequestResponseSchema',
+    'LeaveRequestListItemSchema',
 ]

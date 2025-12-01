@@ -36,6 +36,33 @@ from .leave_request import (
     LeaveRequestResponseSchema,
     LeaveRequestListItemSchema,
 )
+from .performance_review import (
+    PerformanceReviewCreateSchema,
+    PerformanceReviewUpdateSchema,
+    PerformanceReviewResponseSchema,
+    PerformanceReviewFilterSchema,
+)
+from .payroll import (
+    PayrollCreateSchema,
+    PayrollUpdateSchema,
+    PayrollResponseSchema,
+    PayrollListSchema,
+    PayrollFilterSchema,
+)
+from .training_program import (
+    TrainingProgramCreateSchema,
+    TrainingProgramUpdateSchema,
+    TrainingProgramResponseSchema,
+    TrainingProgramListSchema,
+    TrainingProgramFilterSchema,
+)
+from .associate import (
+    AssociateCreateSchema,
+    AssociateUpdateSchema,
+    AssociateResponseSchema,
+    AssociateListSchema,
+    AssociateFilterSchema,
+)
 
 __all__ = [
     'PaginatedResponse',
@@ -66,4 +93,23 @@ __all__ = [
     'LeaveRequestStatusUpdateSchema',
     'LeaveRequestResponseSchema',
     'LeaveRequestListItemSchema',
+    'PerformanceReviewCreateSchema',
+    'PerformanceReviewUpdateSchema',
+    'PerformanceReviewResponseSchema',
+    'PerformanceReviewFilterSchema',
+    'PayrollCreateSchema',
+    'PayrollUpdateSchema',
+    'PayrollResponseSchema',
+    'PayrollListSchema',
+    'PayrollFilterSchema',
+    'TrainingProgramCreateSchema',
+    'TrainingProgramUpdateSchema',
+    'TrainingProgramResponseSchema',
+    'TrainingProgramListSchema',
+    'TrainingProgramFilterSchema',
+    'AssociateCreateSchema',
+    'AssociateUpdateSchema',
+    'AssociateResponseSchema',
+    'AssociateListSchema',
+    'AssociateFilterSchema',
 ]

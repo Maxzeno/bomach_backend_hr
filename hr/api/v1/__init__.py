@@ -8,6 +8,7 @@ from .performance_reviews import router as performance_reviews_router
 from .payroll import router as payroll_router
 from .training_programs import router as training_programs_router
 from .associates import router as associates_router
+from .assets import router as assets_router
 
 # Create v1 router
 v1_router = Router()
@@ -22,5 +23,6 @@ v1_router.add_router('/performance-reviews', performance_reviews_router)
 v1_router.add_router('/payroll', payroll_router)
 v1_router.add_router('/training-programs', training_programs_router)
 v1_router.add_router('/associates', associates_router)
+v1_router.add_router('/assets', assets_router)
 
 __all__ = ['v1_router']

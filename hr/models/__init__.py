@@ -8,5 +8,7 @@ from .performance_review import PerformanceReview
 from .payroll import Payroll
 from .training_program import TrainingProgram
 from .associate import Associate
+from .asset import Asset
+from .work_report import DailyWorkReport
 
-__all__ = ['BaseModel', 'Department', 'SubDepartment', 'JobPosting', 'Applicant', 'LeaveRequest', 'PerformanceReview', 'Payroll', 'TrainingProgram', 'Associate']
+__all__ = ['BaseModel', 'Department', 'SubDepartment', 'JobPosting', 'Applicant', 'LeaveRequest', 'PerformanceReview', 'Payroll', 'TrainingProgram', 'Associate', 'Asset', 'DailyWorkReport']

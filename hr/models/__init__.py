@@ -12,5 +12,6 @@ from .asset import Asset
 from .work_report import DailyWorkReport
 from .scorecard import Scorecard
 from .award import Award
+from .leaderboard import PerformanceLeaderboard
 
-__all__ = ['BaseModel', 'Department', 'SubDepartment', 'JobPosting', 'Applicant', 'LeaveRequest', 'PerformanceReview', 'Payroll', 'TrainingProgram', 'Associate', 'Asset', 'DailyWorkReport', 'Scorecard', 'Award']
+__all__ = ['BaseModel', 'Department', 'SubDepartment', 'JobPosting', 'Applicant', 'LeaveRequest', 'PerformanceReview', 'Payroll', 'TrainingProgram', 'Associate', 'Asset', 'DailyWorkReport', 'Scorecard', 'Award', 'PerformanceLeaderboard']

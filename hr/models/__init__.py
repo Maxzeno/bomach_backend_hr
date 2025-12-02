@@ -10,5 +10,7 @@ from .training_program import TrainingProgram
 from .associate import Associate
 from .asset import Asset
 from .work_report import DailyWorkReport
+from .scorecard import Scorecard
+from .award import Award
 
-__all__ = ['BaseModel', 'Department', 'SubDepartment', 'JobPosting', 'Applicant', 'LeaveRequest', 'PerformanceReview', 'Payroll', 'TrainingProgram', 'Associate', 'Asset', 'DailyWorkReport']
+__all__ = ['BaseModel', 'Department', 'SubDepartment', 'JobPosting', 'Applicant', 'LeaveRequest', 'PerformanceReview', 'Payroll', 'TrainingProgram', 'Associate', 'Asset', 'DailyWorkReport', 'Scorecard', 'Award']

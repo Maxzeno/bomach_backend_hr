@@ -61,14 +61,14 @@ def list_payroll(
 
 
 @router.get("/{payroll_id}", response=PayrollResponseSchema)
-def get_payroll(request, payroll_id: str):
+def get_payroll(request, payroll_id: int):
     """Get a single payroll record by ID"""
     payroll = get_object_or_404(Payroll, id=payroll_id)
     return payroll
 
 
 @router.put("/{payroll_id}", response=PayrollResponseSchema)
-def update_payroll(request, payroll_id: str, payload: PayrollUpdateSchema):
+def update_payroll(request, payroll_id: int, payload: PayrollUpdateSchema):
     """Update a payroll record"""
     payroll = get_object_or_404(Payroll, id=payroll_id)
 
@@ -80,7 +80,7 @@ def update_payroll(request, payroll_id: str, payload: PayrollUpdateSchema):
 
 
 @router.patch("/{payroll_id}/status", response=PayrollResponseSchema)
-def update_payroll_status(request, payroll_id: str, status: str = Query(...)):
+def update_payroll_status(request, payroll_id: int, status: str = Query(...)):
     """Update only the status of a payroll record"""
     payroll = get_object_or_404(Payroll, id=payroll_id)
 
@@ -94,7 +94,7 @@ def update_payroll_status(request, payroll_id: str, status: str = Query(...)):
 
 
 @router.delete("/{payroll_id}", response={204: None})
-def delete_payroll(request, payroll_id: str):
+def delete_payroll(request, payroll_id: int):
     """Delete a payroll record"""
     payroll = get_object_or_404(Payroll, id=payroll_id)
     payroll.delete()

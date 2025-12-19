@@ -1,14 +1,13 @@
 from ninja import Schema, Field
 from typing import Optional
 from datetime import date
-from uuid import UUID
 from decimal import Decimal
 from pydantic import validator, EmailStr
 
 
 class DepartmentMinimalSchema(Schema):
     """Minimal department info for nested responses"""
-    id: UUID
+    id: int
     name: str
 
 
@@ -120,7 +119,7 @@ class AssociateUpdateSchema(Schema):
 
 
 class AssociateResponseSchema(Schema):
-    id: UUID
+    id: int
     associate_id: str
 
     # Personal Information
@@ -170,7 +169,7 @@ class AssociateResponseSchema(Schema):
 
 class AssociateListSchema(Schema):
     """Simplified schema for list view"""
-    id: UUID
+    id: int
     associate_id: str
     full_name: str
     email: str

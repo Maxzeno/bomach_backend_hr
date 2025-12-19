@@ -72,7 +72,7 @@ def list_sub_departments(
         'page': page,
         'page_size': page_size,
         'total_pages': total_pages,
-        'has_next': page < total_pages,
+        'has_next': total > 0 and page < total_pages,
         'has_previous': page > 1,
     }
 
@@ -162,16 +162,19 @@ def get_sub_departments_summary(request):
     """
     Get summary statistics for sub-departments.
     """
+    from django.db.models import Count
+
     total = SubDepartment.objects.count()
     active = SubDepartment.objects.filter(is_active=True).count()
 
-    # Count by department
-    by_department = {}
-    departments = Department.objects.all()
-    for dept in departments:
-        count = SubDepartment.objects.filter(department=dept).count()
-        if count > 0:
-            by_department[dept.name] = count
+    # Count by department using aggregation (fixes N+1 query)
+    by_department_qs = (
+        SubDepartment.objects
+        .values('department__name')
+        .annotate(count=Count('id'))
+        .filter(count__gt=0)
+    )
+    by_department = {item['department__name']: item['count'] for item in by_department_qs if item['department__name']}
 
     return {
         'total': total,

@@ -1,7 +1,6 @@
 from ninja import Schema, Field
 from typing import Optional, Dict
 from datetime import date
-from uuid import UUID
 from decimal import Decimal
 from pydantic import validator
 
@@ -61,7 +60,7 @@ class PayrollUpdateSchema(Schema):
 
 
 class PayrollResponseSchema(Schema):
-    id: UUID
+    id: int
     employee_id: str
     employee_name: str
     employee_email: Optional[str] = None
@@ -88,7 +87,7 @@ class PayrollResponseSchema(Schema):
 
 class PayrollListSchema(Schema):
     """Simplified schema for list view"""
-    id: UUID
+    id: int
     employee_id: str
     employee_name: str
     employee_email: Optional[str] = None

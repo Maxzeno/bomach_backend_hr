@@ -19,10 +19,10 @@ def list_leaderboard(request, month: str = None, branch: str = None):
 
 @router.get("/summary", response=LeaderboardSummarySchema)
 def get_leaderboard_summary(request, month: str = None):
-    qs = PerformanceLeaderboard.objects.all()
+    qs = PerformanceLeaderboard.objects.select_related('associate', 'associate__department').all()
     if month:
         qs = qs.filter(month=month)
-    
+
     top_performers = qs.order_by('rank')[:3]
     avg_score = qs.aggregate(Avg('score'))['score__avg'] or 0
     participants_count = qs.count()

@@ -110,19 +110,21 @@ class Asset(BaseModel):
         return f"{self.asset_id} - {self.name}"
 
     def save(self, *args, **kwargs):
-        # Auto-generate asset_id if not provided? 
-        # The UI shows it as AST-001. I'll implement simple auto-gen logic similar to Associate.
+        # Auto-generate asset_id if not provided
+        # Using select_for_update to prevent race conditions
         if not self.asset_id:
-            last_asset = Asset.objects.order_by('-id').first()
-            if last_asset and last_asset.asset_id:
-                try:
-                    # Assuming format AST-XXX
-                    last_number = int(last_asset.asset_id.split('-')[1])
-                    new_number = last_number + 1
-                except (IndexError, ValueError):
+            from django.db import transaction
+            with transaction.atomic():
+                last_asset = Asset.objects.select_for_update().order_by('-id').first()
+                if last_asset and last_asset.asset_id:
+                    try:
+                        # Assuming format AST-XXX
+                        last_number = int(last_asset.asset_id.split('-')[1])
+                        new_number = last_number + 1
+                    except (IndexError, ValueError):
+                        new_number = 1
+                else:
                     new_number = 1
-            else:
-                new_number = 1
-            self.asset_id = f"AST-{new_number:03d}"
-        
+                self.asset_id = f"AST-{new_number:03d}"
+
         super().save(*args, **kwargs)

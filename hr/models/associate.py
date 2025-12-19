@@ -142,21 +142,24 @@ class Associate(BaseModel):
 
     def save(self, *args, **kwargs):
         """Override save to auto-generate associate_id"""
+        # Using select_for_update to prevent race conditions
         if not self.associate_id:
-            # Get the last associate ID
-            last_associate = Associate.objects.order_by('-id').first()
-            if last_associate and last_associate.associate_id:
-                # Extract number from last ID (e.g., ASC-001 -> 001)
-                try:
-                    last_number = int(last_associate.associate_id.split('-')[1])
-                    new_number = last_number + 1
-                except (IndexError, ValueError):
+            from django.db import transaction
+            with transaction.atomic():
+                # Get the last associate ID with lock
+                last_associate = Associate.objects.select_for_update().order_by('-id').first()
+                if last_associate and last_associate.associate_id:
+                    # Extract number from last ID (e.g., ASC-001 -> 001)
+                    try:
+                        last_number = int(last_associate.associate_id.split('-')[1])
+                        new_number = last_number + 1
+                    except (IndexError, ValueError):
+                        new_number = 1
+                else:
                     new_number = 1
-            else:
-                new_number = 1
 
-            # Format as ASC-001, ASC-002, etc.
-            self.associate_id = f"ASC-{new_number:03d}"
+                # Format as ASC-001, ASC-002, etc.
+                self.associate_id = f"ASC-{new_number:03d}"
 
         super().save(*args, **kwargs)
 

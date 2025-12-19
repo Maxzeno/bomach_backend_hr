@@ -66,7 +66,7 @@ def list_departments(
         'page': page,
         'page_size': page_size,
         'total_pages': total_pages,
-        'has_next': page < total_pages,
+        'has_next': total > 0 and page < total_pages,
         'has_previous': page > 1,
     }
 
@@ -117,16 +117,22 @@ def partial_update_department(request, department_id: int, payload: DepartmentUp
     return department
 
 
-@router.delete('/{department_id}', response={200: MessageSchema, 204: None})
+@router.delete('/{department_id}', response={200: MessageSchema, 400: MessageSchema})
 def delete_department(request, department_id: int):
     """
     Delete a department.
     Note: This will fail if there are job postings associated with this department (protected).
     """
+    from django.db.models import ProtectedError
+
     department = get_object_or_404(Department, id=department_id)
     department_name = department.name
-    department.delete()
-    return 200, {'message': f'Department "{department_name}" deleted successfully'}
+
+    try:
+        department.delete()
+        return 200, {'message': f'Department "{department_name}" deleted successfully'}
+    except ProtectedError:
+        return 400, {'message': f'Cannot delete department "{department_name}" because it has associated job postings.'}
 
 
 @router.get('/stats/summary', response=dict)

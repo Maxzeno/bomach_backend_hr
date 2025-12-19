@@ -41,7 +41,7 @@ def get_scorecard(request, scorecard_id: int):
 @router.put("/{scorecard_id}", response=ScorecardSchema)
 def update_scorecard(request, scorecard_id: int, payload: ScorecardUpdateSchema):
     scorecard = get_object_or_404(Scorecard, id=scorecard_id)
-    for attr, value in payload.dict(exclude_unset=True).items():
+    for attr, value in payload.model_dump(exclude_unset=True).items():
         setattr(scorecard, attr, value)
     scorecard.save()
     return scorecard

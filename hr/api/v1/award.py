@@ -36,7 +36,7 @@ def get_award(request, award_id: int):
 @router.put("/{award_id}", response=AwardSchema)
 def update_award(request, award_id: int, payload: AwardUpdateSchema):
     award = get_object_or_404(Award, id=award_id)
-    for attr, value in payload.dict(exclude_unset=True).items():
+    for attr, value in payload.model_dump(exclude_unset=True).items():
         setattr(award, attr, value)
     award.save()
     return award

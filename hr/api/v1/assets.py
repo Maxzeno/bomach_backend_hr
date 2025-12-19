@@ -1,7 +1,7 @@
 from typing import List, Optional
 from ninja import Router, Query
 from django.shortcuts import get_object_or_404
-from uuid import UUID
+from django.db.models import Q
 from hr.models.asset import Asset
 from hr.api.schemas.asset import AssetCreate, AssetUpdate, AssetOut
 
@@ -16,9 +16,9 @@ def list_assets(
     status: Optional[str] = None
 ):
     qs = Asset.objects.all()
-    
+
     if search:
-        qs = qs.filter(name__icontains=search) | qs.filter(asset_id__icontains=search)
+        qs = qs.filter(Q(name__icontains=search) | Q(asset_id__icontains=search))
     
     if branch:
         qs = qs.filter(branch=branch)
@@ -33,24 +33,24 @@ def list_assets(
 
 @router.post("/", response=AssetOut)
 def create_asset(request, payload: AssetCreate):
-    asset = Asset.objects.create(**payload.dict())
+    asset = Asset.objects.create(**payload.model_dump())
     return asset
 
 @router.get("/{asset_id}", response=AssetOut)
-def get_asset(request, asset_id: UUID):
+def get_asset(request, asset_id: int):
     asset = get_object_or_404(Asset, id=asset_id)
     return asset
 
 @router.put("/{asset_id}", response=AssetOut)
-def update_asset(request, asset_id: UUID, payload: AssetUpdate):
+def update_asset(request, asset_id: int, payload: AssetUpdate):
     asset = get_object_or_404(Asset, id=asset_id)
-    for attr, value in payload.dict(exclude_unset=True).items():
+    for attr, value in payload.model_dump(exclude_unset=True).items():
         setattr(asset, attr, value)
     asset.save()
     return asset
 
 @router.delete("/{asset_id}")
-def delete_asset(request, asset_id: UUID):
+def delete_asset(request, asset_id: int):
     asset = get_object_or_404(Asset, id=asset_id)
     asset.delete()
     return {"success": True}

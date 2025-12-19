@@ -76,14 +76,14 @@ def list_associates(
 
 
 @router.get("/{associate_id}", response=AssociateResponseSchema)
-def get_associate(request, associate_id: str):
+def get_associate(request, associate_id: int):
     """Get a single associate by ID"""
     associate = get_object_or_404(Associate.objects.select_related('department'), id=associate_id)
     return associate
 
 
 @router.put("/{associate_id}", response=AssociateResponseSchema)
-def update_associate(request, associate_id: str, payload: AssociateUpdateSchema):
+def update_associate(request, associate_id: int, payload: AssociateUpdateSchema):
     """Update an associate"""
     associate = get_object_or_404(Associate, id=associate_id)
 
@@ -102,7 +102,7 @@ def update_associate(request, associate_id: str, payload: AssociateUpdateSchema)
     start_date = update_data.get('contract_start_date', associate.contract_start_date)
     end_date = update_data.get('contract_end_date', associate.contract_end_date)
 
-    if end_date < start_date:
+    if start_date and end_date and end_date < start_date:
         raise ValueError('Contract end date must be after start date')
 
     for attr, value in update_data.items():
@@ -113,7 +113,7 @@ def update_associate(request, associate_id: str, payload: AssociateUpdateSchema)
 
 
 @router.patch("/{associate_id}/status", response=AssociateResponseSchema)
-def update_associate_status(request, associate_id: str, status: str = Query(...)):
+def update_associate_status(request, associate_id: int, status: str = Query(...)):
     """Update only the status of an associate"""
     associate = get_object_or_404(Associate, id=associate_id)
 
@@ -127,7 +127,7 @@ def update_associate_status(request, associate_id: str, status: str = Query(...)
 
 
 @router.delete("/{associate_id}", response={204: None})
-def delete_associate(request, associate_id: str):
+def delete_associate(request, associate_id: int):
     """Delete an associate"""
     associate = get_object_or_404(Associate, id=associate_id)
     associate.delete()

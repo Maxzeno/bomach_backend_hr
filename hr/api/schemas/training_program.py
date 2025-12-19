@@ -1,7 +1,6 @@
 from ninja import Schema, Field
 from typing import Optional
 from datetime import date
-from uuid import UUID
 from decimal import Decimal
 from pydantic import validator
 
@@ -71,7 +70,7 @@ class TrainingProgramUpdateSchema(Schema):
 
 
 class TrainingProgramResponseSchema(Schema):
-    id: UUID
+    id: int
     program_name: str
     provider: str
     description: str
@@ -97,7 +96,7 @@ class TrainingProgramResponseSchema(Schema):
 
 class TrainingProgramListSchema(Schema):
     """Simplified schema for list view"""
-    id: UUID
+    id: int
     program_name: str
     start_date: date
     end_date: date

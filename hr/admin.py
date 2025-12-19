@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Department, SubDepartment, JobPosting, Applicant, LeaveRequest, PerformanceReview, Payroll, TrainingProgram, Associate
+from .models import (
+    Department, SubDepartment, JobPosting, Applicant, LeaveRequest,
+    PerformanceReview, Payroll, TrainingProgram, Associate, Asset,
+    DailyWorkReport, Scorecard, Award, PerformanceLeaderboard
+)
 
 
 @admin.register(Department)
@@ -335,3 +339,85 @@ class AssociateAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+@admin.register(Asset)
+class AssetAdmin(admin.ModelAdmin):
+    list_display = [
+        'asset_id',
+        'name',
+        'asset_type',
+        'branch',
+        'status',
+        'assigned_to_name',
+        'value',
+        'created_at',
+    ]
+    list_filter = ['status', 'asset_type', 'branch', 'created_at']
+    search_fields = ['asset_id', 'name', 'serial_number', 'assigned_to_name']
+    readonly_fields = ['asset_id', 'created_at', 'updated_at']
+    list_editable = ['status']
+    ordering = ['-created_at']
+
+
+@admin.register(DailyWorkReport)
+class DailyWorkReportAdmin(admin.ModelAdmin):
+    list_display = ['id', 'employee_name', 'employee_email', 'date', 'hours_worked', 'mood', 'status', 'created_at']
+    list_filter = ['status', 'mood', 'date', 'created_at']
+    search_fields = ['employee_name', 'employee_email']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-date', '-created_at']
+    list_editable = ['status']
+
+
+@admin.register(Scorecard)
+class ScorecardAdmin(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'associate',
+        'month',
+        'overall_score',
+        'target_achievement',
+        'branch_ranking',
+        'created_at',
+    ]
+    list_filter = ['month', 'created_at']
+    search_fields = ['associate__full_name', 'associate__associate_id']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-month']
+    autocomplete_fields = ['associate']
+
+
+@admin.register(Award)
+class AwardAdmin(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'associate',
+        'title',
+        'category',
+        'date_awarded',
+        'rank_level',
+        'created_at',
+    ]
+    list_filter = ['category', 'rank_level', 'date_awarded', 'created_at']
+    search_fields = ['associate__full_name', 'associate__associate_id', 'title']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-date_awarded']
+    autocomplete_fields = ['associate']
+
+
+@admin.register(PerformanceLeaderboard)
+class PerformanceLeaderboardAdmin(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'associate',
+        'month',
+        'score',
+        'rank',
+        'created_at',
+    ]
+    list_filter = ['month', 'created_at']
+    search_fields = ['associate__full_name', 'associate__associate_id']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-month', 'rank']
+    autocomplete_fields = ['associate']

@@ -62,14 +62,14 @@ def list_training_programs(
 
 
 @router.get("/{program_id}", response=TrainingProgramResponseSchema)
-def get_training_program(request, program_id: str):
+def get_training_program(request, program_id: int):
     """Get a single training program by ID"""
     program = get_object_or_404(TrainingProgram, id=program_id)
     return program
 
 
 @router.put("/{program_id}", response=TrainingProgramResponseSchema)
-def update_training_program(request, program_id: str, payload: TrainingProgramUpdateSchema):
+def update_training_program(request, program_id: int, payload: TrainingProgramUpdateSchema):
     """Update a training program"""
     program = get_object_or_404(TrainingProgram, id=program_id)
 
@@ -92,7 +92,7 @@ def update_training_program(request, program_id: str, payload: TrainingProgramUp
 
 
 @router.patch("/{program_id}/status", response=TrainingProgramResponseSchema)
-def update_training_program_status(request, program_id: str, status: str = Query(...)):
+def update_training_program_status(request, program_id: int, status: str = Query(...)):
     """Update only the status of a training program"""
     program = get_object_or_404(TrainingProgram, id=program_id)
 
@@ -106,7 +106,7 @@ def update_training_program_status(request, program_id: str, status: str = Query
 
 
 @router.delete("/{program_id}", response={204: None})
-def delete_training_program(request, program_id: str):
+def delete_training_program(request, program_id: int):
     """Delete a training program"""
     program = get_object_or_404(TrainingProgram, id=program_id)
     program.delete()

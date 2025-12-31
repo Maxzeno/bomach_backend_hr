@@ -63,6 +63,13 @@ from .associate import (
     AssociateListSchema,
     AssociateFilterSchema,
 )
+from .work_report import (
+    WorkReportCreate,
+    WorkReportUpdate,
+    WorkReportStatusUpdate,
+    WorkReportOut,
+    WorkReportListItem,
+)
 
 __all__ = [
     'PaginatedResponse',
@@ -112,4 +119,9 @@ __all__ = [
     'AssociateResponseSchema',
     'AssociateListSchema',
     'AssociateFilterSchema',
+    'WorkReportCreate',
+    'WorkReportUpdate',
+    'WorkReportStatusUpdate',
+    'WorkReportOut',
+    'WorkReportListItem',
 ]

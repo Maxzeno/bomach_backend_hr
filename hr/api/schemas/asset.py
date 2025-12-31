@@ -8,6 +8,7 @@ class AssetCreate(Schema):
     name: str
     asset_type: str
     branch: str
+    assigned_to_id: Optional[str] = None
     assigned_to_name: Optional[str] = None
     assigned_to_email: Optional[str] = None
     department_id: Optional[UUID] = None
@@ -25,6 +26,7 @@ class AssetUpdate(Schema):
     name: Optional[str] = None
     asset_type: Optional[str] = None
     branch: Optional[str] = None
+    assigned_to_id: Optional[str] = None
     assigned_to_name: Optional[str] = None
     assigned_to_email: Optional[str] = None
     department_id: Optional[UUID] = None
@@ -44,6 +46,7 @@ class AssetOut(Schema):
     name: str
     asset_type: str
     branch: str
+    assigned_to_id: Optional[str] = None
     assigned_to_name: Optional[str] = None
     assigned_to_email: Optional[str] = None
     department_id: Optional[UUID] = None

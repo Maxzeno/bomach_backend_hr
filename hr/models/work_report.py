@@ -21,7 +21,8 @@ class DailyWorkReport(BaseModel):
         ('Rejected', 'Rejected'),
     ]
 
-    # Employee Information (Using CharFields as Employee model is missing/not confirmed)
+    # Employee Information (employee_id references main backend Employee)
+    employee_id = models.CharField(max_length=50, db_index=True, default='', help_text="Employee ID from main backend")
     employee_name = models.CharField(max_length=255, db_index=True)
     employee_email = models.EmailField(max_length=255, db_index=True)
 
@@ -59,10 +60,11 @@ class DailyWorkReport(BaseModel):
         verbose_name = 'Daily Work Report'
         verbose_name_plural = 'Daily Work Reports'
         indexes = [
+            models.Index(fields=['employee_id', 'date']),
             models.Index(fields=['employee_email', 'date']),
             models.Index(fields=['status']),
         ]
-        unique_together = ['employee_email', 'date']
+        unique_together = ['employee_id', 'date']
 
     def __str__(self):
         return f"{self.employee_name} - {self.date}"

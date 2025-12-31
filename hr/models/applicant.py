@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, IntegrityError, transaction
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .base import BaseModel
 from .job_posting import JobPosting
@@ -71,17 +71,32 @@ class Applicant(BaseModel):
         return f"{self.first_name} {self.last_name} - {self.job_posting.job_title}"
 
     def save(self, *args, **kwargs):
-        # Generate application_id if not exists
+        # Generate application_id if not exists with retry logic for race conditions
         if not self.application_id:
-            self.application_id = self.generate_application_id()
-        super().save(*args, **kwargs)
+            max_retries = 5
+            for attempt in range(max_retries):
+                self.application_id = self._generate_random_id()
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                    return  # Success, exit
+                except IntegrityError:
+                    if attempt == max_retries - 1:
+                        raise  # Re-raise on final attempt
+                    self.application_id = None  # Reset and try again
+        else:
+            super().save(*args, **kwargs)
+
+    @staticmethod
+    def _generate_random_id():
+        """Generate a random 6 character alphanumeric ID like K987KD"""
+        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
     @staticmethod
     def generate_application_id():
-        """Generate a unique application ID like K987KD"""
+        """Generate a unique application ID like K987KD (for external use)"""
         while True:
-            # Generate 6 character alphanumeric ID
-            app_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            app_id = Applicant._generate_random_id()
             if not Applicant.objects.filter(application_id=app_id).exists():
                 return app_id
 

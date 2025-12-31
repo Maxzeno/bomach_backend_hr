@@ -45,16 +45,23 @@ class Asset(BaseModel):
         max_length=100,
         help_text="Branch where the asset is located"
     )
+    assigned_to_id = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Employee ID from main auth service"
+    )
     assigned_to_name = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text="Name of the person assigned to"
+        help_text="Cached name of the person assigned to"
     )
     assigned_to_email = models.EmailField(
         blank=True,
         null=True,
-        help_text="Email of the person assigned to"
+        help_text="Cached email of the person assigned to"
     )
     department = models.ForeignKey(
         Department,
@@ -104,6 +111,7 @@ class Asset(BaseModel):
             models.Index(fields=['status']),
             models.Index(fields=['asset_type']),
             models.Index(fields=['branch']),
+            models.Index(fields=['assigned_to_id']),
         ]
 
     def __str__(self):

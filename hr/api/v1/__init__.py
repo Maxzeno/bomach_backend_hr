@@ -12,6 +12,7 @@ from .assets import router as assets_router
 from .scorecard import router as scorecard_router
 from .award import router as award_router
 from .leaderboard import router as leaderboard_router
+from .work_reports import router as work_reports_router
 
 # Create v1 router
 v1_router = Router()
@@ -30,5 +31,6 @@ v1_router.add_router('/assets', assets_router)
 v1_router.add_router('/scorecards', scorecard_router)
 v1_router.add_router('/awards', award_router)
 v1_router.add_router('/leaderboard', leaderboard_router)
+v1_router.add_router('/work-reports', work_reports_router)
 
 __all__ = ['v1_router']

@@ -1,6 +1,8 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .base import BaseModel
+from hr.utils.validators import validate_employee_id
 
 
 class PerformanceReview(BaseModel):
@@ -79,3 +81,47 @@ class PerformanceReview(BaseModel):
     def rating_display(self):
         """Get the rating as a display string"""
         return f"{self.overall_rating} Star{'s' if self.overall_rating != 1 else ''}"
+
+    def clean(self):
+        """
+        Validate cross-service references before saving.
+        """
+        super().clean()
+        errors = {}
+
+        # Validate employee_id
+        if self.employee_id:
+            try:
+                employee_info = validate_employee_id(self.employee_id)
+                # Update cached fields with validated data
+                if employee_info:
+                    self.employee_name = employee_info.get('full_name', self.employee_name)
+                    self.employee_email = employee_info.get('email', self.employee_email)
+            except ValidationError as e:
+                errors['employee_id'] = e.message
+
+        # Validate reviewer_id
+        if self.reviewer_id:
+            try:
+                reviewer_info = validate_employee_id(self.reviewer_id)
+                # Update cached reviewer name
+                if reviewer_info:
+                    self.reviewer_name = reviewer_info.get('full_name', self.reviewer_name)
+            except ValidationError as e:
+                errors['reviewer_id'] = e.message
+
+        # Validate that reviewer is not the same as employee
+        if self.employee_id and self.reviewer_id and self.employee_id == self.reviewer_id:
+            errors['reviewer_id'] = "Reviewer cannot be the same as the employee being reviewed"
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """
+        Override save to ensure validation happens.
+        """
+        if not kwargs.pop('skip_validation', False):
+            self.full_clean()
+
+        super().save(*args, **kwargs)

@@ -1,7 +1,9 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from .base import BaseModel
+from hr.utils.validators import validate_employee_id
 
 
 class Payroll(BaseModel):
@@ -101,8 +103,33 @@ class Payroll(BaseModel):
         total_deductions = self.total_deductions
         return self.gross_salary + total_allowances - total_deductions
 
+    def clean(self):
+        """
+        Validate cross-service references before saving.
+        """
+        super().clean()
+        errors = {}
+
+        # Validate employee_id
+        if self.employee_id:
+            try:
+                employee_info = validate_employee_id(self.employee_id)
+                # Update cached fields with validated data
+                if employee_info:
+                    self.employee_name = employee_info.get('full_name', self.employee_name)
+                    self.employee_email = employee_info.get('email', self.employee_email)
+            except ValidationError as e:
+                errors['employee_id'] = e.message
+
+        if errors:
+            raise ValidationError(errors)
+
     def save(self, *args, **kwargs):
-        """Override save to auto-calculate net salary"""
+        """Override save to validate and auto-calculate net salary"""
+        # Validate employee_id unless explicitly skipped
+        if not kwargs.pop('skip_validation', False):
+            self.full_clean()
+
         # Auto-calculate net salary before saving
         self.net_salary = self.calculate_net_salary()
         super().save(*args, **kwargs)

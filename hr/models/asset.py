@@ -1,8 +1,10 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from .base import BaseModel
 from .department import Department
+from hr.utils.validators import validate_employee_id
 
 class Asset(BaseModel):
     """Model for company assets"""
@@ -117,7 +119,32 @@ class Asset(BaseModel):
     def __str__(self):
         return f"{self.asset_id} - {self.name}"
 
+    def clean(self):
+        """
+        Validate cross-service references before saving.
+        """
+        super().clean()
+        errors = {}
+
+        # Validate assigned_to_id (optional field)
+        if self.assigned_to_id:
+            try:
+                employee_info = validate_employee_id(self.assigned_to_id)
+                # Update cached fields with validated data
+                if employee_info:
+                    self.assigned_to_name = employee_info.get('full_name', self.assigned_to_name)
+                    self.assigned_to_email = employee_info.get('email', self.assigned_to_email)
+            except ValidationError as e:
+                errors['assigned_to_id'] = e.message
+
+        if errors:
+            raise ValidationError(errors)
+
     def save(self, *args, **kwargs):
+        # Validate unless explicitly skipped
+        if not kwargs.pop('skip_validation', False):
+            self.full_clean()
+
         # Auto-generate asset_id if not provided
         # Using select_for_update to prevent race conditions
         if not self.asset_id:

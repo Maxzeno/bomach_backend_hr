@@ -1,5 +1,7 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from .base import BaseModel
+from hr.utils.validators import validate_employee_id
 
 
 class LeaveRequest(BaseModel):
@@ -67,3 +69,47 @@ class LeaveRequest(BaseModel):
         if self.start_date and self.end_date:
             return (self.end_date - self.start_date).days + 1
         return 0
+
+    def clean(self):
+        """
+        Validate cross-service references before saving.
+        Called by full_clean() and save().
+        """
+        super().clean()
+        errors = {}
+
+        # Validate employee_id
+        if self.employee_id:
+            try:
+                employee_info = validate_employee_id(self.employee_id)
+                # Update cached fields with validated data
+                if employee_info:
+                    self.employee_name = employee_info.get('full_name', self.employee_name)
+                    self.employee_email = employee_info.get('email', self.employee_email)
+            except ValidationError as e:
+                errors['employee_id'] = e.message
+
+        # Validate approver_id (optional field)
+        if self.approver_id:
+            try:
+                validate_employee_id(self.approver_id)
+            except ValidationError as e:
+                errors['approver_id'] = e.message
+
+        # Validate date logic
+        if self.start_date and self.end_date:
+            if self.end_date < self.start_date:
+                errors['end_date'] = "End date cannot be before start date"
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """
+        Override save to ensure validation happens.
+        """
+        # Skip validation if explicitly requested (for data migrations, etc.)
+        if not kwargs.pop('skip_validation', False):
+            self.full_clean()
+
+        super().save(*args, **kwargs)

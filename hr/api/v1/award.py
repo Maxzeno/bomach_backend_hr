@@ -1,5 +1,6 @@
 from typing import List
 from ninja import Router
+from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from hr.models.award import Award
 from hr.models.associate import Associate
@@ -21,6 +22,7 @@ def create_award(request, payload: AwardCreateSchema):
     return award
 
 @router.get("/", response=List[AwardSchema])
+@paginate(LimitOffsetPagination, page_size=10)
 def list_awards(request, year: int = None, associate_id: str = None):
     qs = Award.objects.all()
     if year:

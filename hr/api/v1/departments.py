@@ -1,6 +1,6 @@
-from typing import Optional
-from math import ceil
+from typing import Optional, List
 from ninja import Router
+from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
@@ -9,7 +9,6 @@ from hr.api.schemas import (
     DepartmentCreateSchema,
     DepartmentUpdateSchema,
     DepartmentResponseSchema,
-    PaginatedResponse,
     MessageSchema,
 )
 
@@ -17,27 +16,22 @@ from hr.api.schemas import (
 router = Router(tags=['Departments'])
 
 
-@router.get('/', response=PaginatedResponse[DepartmentResponseSchema])
+@router.get('/', response=List[DepartmentResponseSchema])
+@paginate(LimitOffsetPagination, page_size=10)
 def list_departments(
     request,
     search: Optional[str] = None,
     is_active: Optional[bool] = None,
-    page: int = 1,
-    page_size: int = 10,
 ):
     """
-    List all departments with optional filtering, search, and pagination.
+    List all departments with optional filtering and search.
 
     Query Parameters:
     - search: Search in department name and description
     - is_active: Filter by active status
-    - page: Page number (default: 1)
-    - page_size: Number of items per page (default: 10, max: 100)
+    - limit: Number of items per page (default: 10)
+    - offset: Starting position
     """
-    # Validate and limit page_size
-    page_size = min(page_size, 100)
-    page = max(page, 1)
-
     queryset = Department.objects.all()
 
     # Search functionality
@@ -51,24 +45,7 @@ def list_departments(
     if is_active is not None:
         queryset = queryset.filter(is_active=is_active)
 
-    # Get total count
-    total = queryset.count()
-    total_pages = ceil(total / page_size) if page_size > 0 else 0
-
-    # Pagination
-    start = (page - 1) * page_size
-    end = start + page_size
-    items = list(queryset[start:end])
-
-    return {
-        'items': items,
-        'total': total,
-        'page': page,
-        'page_size': page_size,
-        'total_pages': total_pages,
-        'has_next': total > 0 and page < total_pages,
-        'has_previous': page > 1,
-    }
+    return queryset
 
 
 @router.get('/{department_id}', response=DepartmentResponseSchema)

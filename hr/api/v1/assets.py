@@ -1,5 +1,6 @@
 from typing import List, Optional
 from ninja import Router, Query
+from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from hr.models.asset import Asset
@@ -8,6 +9,7 @@ from hr.api.schemas.asset import AssetCreate, AssetUpdate, AssetOut
 router = Router()
 
 @router.get("/", response=List[AssetOut])
+@paginate(LimitOffsetPagination, page_size=10)
 def list_assets(
     request,
     search: Optional[str] = None,
@@ -19,16 +21,16 @@ def list_assets(
 
     if search:
         qs = qs.filter(Q(name__icontains=search) | Q(asset_id__icontains=search))
-    
+
     if branch:
         qs = qs.filter(branch=branch)
-        
+
     if asset_type:
         qs = qs.filter(asset_type=asset_type)
-        
+
     if status:
         qs = qs.filter(status=status)
-        
+
     return qs
 
 @router.post("/", response=AssetOut)

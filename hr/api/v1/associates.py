@@ -10,7 +10,7 @@ from hr.api.schemas import (
     AssociateListSchema,
     AssociateFilterSchema,
 )
-from ninja.pagination import paginate
+from ninja.pagination import paginate, LimitOffsetPagination
 
 router = Router(tags=['Associates'])
 
@@ -30,7 +30,7 @@ def create_associate(request, payload: AssociateCreateSchema):
 
 
 @router.get("/", response=List[AssociateListSchema])
-@paginate
+@paginate(LimitOffsetPagination, page_size=10)
 def list_associates(
     request,
     search: Optional[str] = Query(None, description="Search by name, role, or company"),

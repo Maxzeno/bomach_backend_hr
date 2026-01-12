@@ -1,5 +1,6 @@
 from typing import List
 from ninja import Router
+from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from hr.models.scorecard import Scorecard
 from hr.models.associate import Associate
@@ -26,6 +27,7 @@ def create_scorecard(request, payload: ScorecardCreateSchema):
     return scorecard
 
 @router.get("/", response=List[ScorecardSchema])
+@paginate(LimitOffsetPagination, page_size=10)
 def list_scorecards(request, month: str = None, associate_id: str = None):
     qs = Scorecard.objects.all()
     if month:

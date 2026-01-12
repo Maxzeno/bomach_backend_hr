@@ -10,7 +10,7 @@ from hr.api.schemas import (
     TrainingProgramListSchema,
     TrainingProgramFilterSchema,
 )
-from ninja.pagination import paginate
+from ninja.pagination import paginate, LimitOffsetPagination
 
 router = Router(tags=['Training Programs'])
 
@@ -23,7 +23,7 @@ def create_training_program(request, payload: TrainingProgramCreateSchema):
 
 
 @router.get("/", response=List[TrainingProgramListSchema])
-@paginate
+@paginate(LimitOffsetPagination, page_size=10)
 def list_training_programs(
     request,
     search: Optional[str] = Query(None, description="Search by program name"),

@@ -1,7 +1,7 @@
-from typing import Optional
-from math import ceil
+from typing import Optional, List
 from datetime import date
 from ninja import Router
+from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
@@ -12,7 +12,6 @@ from hr.api.schemas import (
     LeaveRequestStatusUpdateSchema,
     LeaveRequestResponseSchema,
     LeaveRequestListItemSchema,
-    PaginatedResponse,
     MessageSchema,
 )
 
@@ -20,7 +19,8 @@ from hr.api.schemas import (
 router = Router(tags=['Leave Requests'])
 
 
-@router.get('/', response=PaginatedResponse[LeaveRequestListItemSchema])
+@router.get('/', response=List[LeaveRequestListItemSchema])
+@paginate(LimitOffsetPagination, page_size=10)
 def list_leave_requests(
     request,
     search: Optional[str] = None,
@@ -29,11 +29,9 @@ def list_leave_requests(
     status: Optional[str] = None,
     start_date_from: Optional[date] = None,
     start_date_to: Optional[date] = None,
-    page: int = 1,
-    page_size: int = 10,
 ):
     """
-    List all leave requests with optional filtering, search, and pagination.
+    List all leave requests with optional filtering and search.
 
     Query Parameters:
     - search: Search by employee name or employee ID
@@ -42,13 +40,9 @@ def list_leave_requests(
     - status: Filter by status
     - start_date_from: Filter by start date (from)
     - start_date_to: Filter by start date (to)
-    - page: Page number (default: 1)
-    - page_size: Number of items per page (default: 10, max: 100)
+    - limit: Number of items per page (default: 10)
+    - offset: Starting position
     """
-    # Validate and limit page_size
-    page_size = min(page_size, 100)
-    page = max(page, 1)
-
     queryset = LeaveRequest.objects.all()
 
     # Search functionality
@@ -75,24 +69,7 @@ def list_leave_requests(
     if start_date_to:
         queryset = queryset.filter(start_date__lte=start_date_to)
 
-    # Get total count
-    total = queryset.count()
-    total_pages = ceil(total / page_size) if page_size > 0 else 0
-
-    # Pagination
-    start = (page - 1) * page_size
-    end = start + page_size
-    items = list(queryset[start:end])
-
-    return {
-        'items': items,
-        'total': total,
-        'page': page,
-        'page_size': page_size,
-        'total_pages': total_pages,
-        'has_next': page < total_pages,
-        'has_previous': page > 1,
-    }
+    return queryset
 
 
 @router.get('/{leave_request_id}', response=LeaveRequestResponseSchema)

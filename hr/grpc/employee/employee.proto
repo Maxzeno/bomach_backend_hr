@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package employee;
+
+
+service EmployeeService {
+  rpc ValidateEmployee (ValidateEmployeeRequest)
+      returns (ValidateEmployeeResponse);
+}
+
+message ValidateEmployeeRequest {
+  string employee_id = 1;
+}
+
+message ValidateEmployeeResponse {
+  string employee_id = 1;
+  string employee_name = 2;
+}

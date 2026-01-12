@@ -10,7 +10,7 @@ from hr.api.schemas import (
     PerformanceReviewFilterSchema,
     PaginatedResponse,
 )
-from ninja.pagination import paginate
+from ninja.pagination import paginate, LimitOffsetPagination
 
 router = Router(tags=['Performance Reviews'])
 
@@ -20,7 +20,7 @@ def create_performance_review(request, payload: PerformanceReviewCreateSchema):
     return 201, review
 
 @router.get("/", response=List[PerformanceReviewResponseSchema])
-@paginate
+@paginate(LimitOffsetPagination, page_size=10)
 def list_performance_reviews(request, filters: PerformanceReviewFilterSchema = Query(...)):
     reviews = PerformanceReview.objects.all()
 

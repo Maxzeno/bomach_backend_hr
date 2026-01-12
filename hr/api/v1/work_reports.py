@@ -1,7 +1,7 @@
-from typing import Optional
-from math import ceil
+from typing import Optional, List
 from datetime import date
 from ninja import Router
+from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
@@ -12,7 +12,6 @@ from hr.api.schemas import (
     WorkReportStatusUpdate,
     WorkReportOut,
     WorkReportListItem,
-    PaginatedResponse,
     MessageSchema,
 )
 
@@ -20,7 +19,8 @@ from hr.api.schemas import (
 router = Router(tags=['Work Reports'])
 
 
-@router.get('/', response=PaginatedResponse[WorkReportListItem])
+@router.get('/', response=List[WorkReportListItem])
+@paginate(LimitOffsetPagination, page_size=10)
 def list_work_reports(
     request,
     search: Optional[str] = None,
@@ -29,11 +29,9 @@ def list_work_reports(
     mood: Optional[str] = None,
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
-    page: int = 1,
-    page_size: int = 10,
 ):
     """
-    List all daily work reports with optional filtering, search, and pagination.
+    List all daily work reports with optional filtering and search.
 
     Query Parameters:
     - search: Search by employee name, employee ID, or email
@@ -42,12 +40,9 @@ def list_work_reports(
     - mood: Filter by mood (Happy, Neutral, Sad, Stressed, Tired)
     - date_from: Filter by date (from)
     - date_to: Filter by date (to)
-    - page: Page number (default: 1)
-    - page_size: Number of items per page (default: 10, max: 100)
+    - limit: Number of items per page (default: 10)
+    - offset: Starting position
     """
-    page_size = min(page_size, 100)
-    page = max(page, 1)
-
     queryset = DailyWorkReport.objects.all()
 
     if search:
@@ -72,22 +67,7 @@ def list_work_reports(
     if date_to:
         queryset = queryset.filter(date__lte=date_to)
 
-    total = queryset.count()
-    total_pages = ceil(total / page_size) if page_size > 0 else 0
-
-    start = (page - 1) * page_size
-    end = start + page_size
-    items = list(queryset[start:end])
-
-    return {
-        'items': items,
-        'total': total,
-        'page': page,
-        'page_size': page_size,
-        'total_pages': total_pages,
-        'has_next': page < total_pages,
-        'has_previous': page > 1,
-    }
+    return queryset
 
 
 @router.get('/{report_id}', response=WorkReportOut)

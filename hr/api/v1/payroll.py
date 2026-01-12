@@ -11,7 +11,7 @@ from hr.api.schemas import (
     PayrollFilterSchema,
     PaginatedResponse,
 )
-from ninja.pagination import paginate
+from ninja.pagination import paginate, LimitOffsetPagination
 
 router = Router(tags=['Payroll'])
 
@@ -24,7 +24,7 @@ def create_payroll(request, payload: PayrollCreateSchema):
 
 
 @router.get("/", response=List[PayrollListSchema])
-@paginate
+@paginate(LimitOffsetPagination, page_size=10)
 def list_payroll(
     request,
     search: Optional[str] = Query(None, description="Search by employee name or ID"),

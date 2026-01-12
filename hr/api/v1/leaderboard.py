@@ -1,5 +1,6 @@
 from typing import List
 from ninja import Router
+from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 from hr.models.leaderboard import PerformanceLeaderboard
@@ -8,6 +9,7 @@ from hr.api.schemas.leaderboard import LeaderboardSchema, LeaderboardSummarySche
 router = Router(tags=["Performance Leaderboard"])
 
 @router.get("/", response=List[LeaderboardSchema])
+@paginate(LimitOffsetPagination, page_size=10)
 def list_leaderboard(request, month: str = None, branch: str = None):
     qs = PerformanceLeaderboard.objects.select_related('associate', 'associate__department').all()
     if month:

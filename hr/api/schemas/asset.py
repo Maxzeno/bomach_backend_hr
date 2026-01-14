@@ -11,7 +11,7 @@ class AssetCreate(Schema):
     assigned_to_id: Optional[str] = None
     assigned_to_name: Optional[str] = None
     assigned_to_email: Optional[str] = None
-    department_id: Optional[UUID] = None
+    department_id: Optional[str] = None
     purchase_date: Optional[date] = None
     value: Optional[Decimal] = None
     vendor: Optional[str] = None
@@ -29,7 +29,7 @@ class AssetUpdate(Schema):
     assigned_to_id: Optional[str] = None
     assigned_to_name: Optional[str] = None
     assigned_to_email: Optional[str] = None
-    department_id: Optional[UUID] = None
+    department_id: Optional[str] = None
     purchase_date: Optional[date] = None
     value: Optional[Decimal] = None
     vendor: Optional[str] = None
@@ -49,7 +49,7 @@ class AssetOut(Schema):
     assigned_to_id: Optional[str] = None
     assigned_to_name: Optional[str] = None
     assigned_to_email: Optional[str] = None
-    department_id: Optional[UUID] = None
+    department_id: Optional[str] = None
     purchase_date: Optional[date] = None
     value: Optional[Decimal] = None
     vendor: Optional[str] = None

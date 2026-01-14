@@ -1,57 +1,16 @@
 from django.contrib import admin
 from .models import (
-    Department, SubDepartment, JobPosting, Applicant, LeaveRequest,
+    JobPosting, Applicant, LeaveRequest,
     PerformanceReview, Payroll, TrainingProgram, Associate, Asset,
     DailyWorkReport, Scorecard, Award, PerformanceLeaderboard
 )
-
-
-@admin.register(Department)
-class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ['name', 'is_active', 'created_at']
-    list_filter = ['is_active', 'created_at']
-    search_fields = ['name', 'description']
-    readonly_fields = ['created_at', 'updated_at']
-    list_editable = ['is_active']
-    ordering = ['name']
-
-    fieldsets = (
-        ('Basic Information', {
-            'fields': ('name', 'description', 'is_active')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-
-@admin.register(SubDepartment)
-class SubDepartmentAdmin(admin.ModelAdmin):
-    list_display = ['name', 'department', 'is_active', 'created_at']
-    list_filter = ['is_active', 'department', 'created_at']
-    search_fields = ['name', 'description', 'department__name']
-    readonly_fields = ['created_at', 'updated_at']
-    list_editable = ['is_active']
-    ordering = ['department', 'name']
-    autocomplete_fields = ['department']
-
-    fieldsets = (
-        ('Basic Information', {
-            'fields': ('name', 'description', 'department', 'is_active')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
 
 
 @admin.register(JobPosting)
 class JobPostingAdmin(admin.ModelAdmin):
     list_display = [
         'job_title',
-        'department',
+        'department_id',
         'location',
         'job_type',
         'status',
@@ -59,8 +18,8 @@ class JobPostingAdmin(admin.ModelAdmin):
         'is_active',
         'created_at',
     ]
-    list_filter = ['status', 'job_type', 'department', 'location', 'is_active', 'created_at']
-    search_fields = ['job_title', 'department', 'location', 'description']
+    list_filter = ['status', 'job_type', 'location', 'is_active', 'created_at']
+    search_fields = ['job_title', 'department_id', 'location', 'description']
     readonly_fields = ['created_at', 'updated_at', 'applicants_count']
     list_editable = ['status', 'is_active']
     ordering = ['-created_at']
@@ -68,7 +27,7 @@ class JobPostingAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('job_title', 'department', 'location', 'job_type', 'status', 'is_active')
+            'fields': ('job_title', 'department_id', 'location', 'job_type', 'status', 'is_active')
         }),
         ('Job Details', {
             'fields': ('description', 'requirements', 'responsibilities', 'salary_range', 'deadline')
@@ -298,13 +257,12 @@ class AssociateAdmin(admin.ModelAdmin):
         'is_contract_active',
         'created_at',
     ]
-    list_filter = ['status', 'role_position', 'company_name', 'department', 'contract_start_date', 'created_at']
-    search_fields = ['associate_id', 'full_name', 'email', 'company_name', 'phone_number', 'role_position']
+    list_filter = ['status', 'role_position', 'company_name', 'contract_start_date', 'created_at']
+    search_fields = ['associate_id', 'full_name', 'email', 'company_name', 'phone_number', 'role_position', 'department_id']
     readonly_fields = ['associate_id', 'created_at', 'updated_at', 'contract_period', 'contract_duration_days', 'is_contract_active', 'is_contract_expired']
     list_editable = ['status']
     ordering = ['-created_at']
     date_hierarchy = 'contract_start_date'
-    autocomplete_fields = ['department']
 
     fieldsets = (
         ('Associate ID', {
@@ -314,7 +272,7 @@ class AssociateAdmin(admin.ModelAdmin):
             'fields': ('full_name', 'email', 'phone_number', 'address')
         }),
         ('Professional Information', {
-            'fields': ('company_name', 'role_position', 'department', 'specialization')
+            'fields': ('company_name', 'role_position', 'department_id', 'specialization')
         }),
         ('Contract Information', {
             'fields': (

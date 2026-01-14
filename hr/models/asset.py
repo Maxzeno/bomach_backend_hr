@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from .base import BaseModel
-from .department import Department
 from hr.utils.validators import validate_employee_id
 
 class Asset(BaseModel):
@@ -65,12 +64,12 @@ class Asset(BaseModel):
         null=True,
         help_text="Cached email of the person assigned to"
     )
-    department = models.ForeignKey(
-        Department,
-        on_delete=models.SET_NULL,
+    department_id = models.CharField(
+        max_length=255,
         null=True,
         blank=True,
-        related_name='assets'
+        db_index=True,
+        help_text="Department ID from department microservice"
     )
 
     # Financial Information

@@ -2,7 +2,6 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from .base import BaseModel
-from .department import Department
 
 
 class Associate(BaseModel):
@@ -66,13 +65,12 @@ class Associate(BaseModel):
         choices=ROLE_CHOICES,
         default='Other'
     )
-    department = models.ForeignKey(
-        Department,
-        on_delete=models.SET_NULL,
+    department_id = models.CharField(
+        max_length=255,
         null=True,
         blank=True,
-        related_name='associates',
-        help_text="Associated department"
+        db_index=True,
+        help_text="Department ID from department microservice"
     )
     specialization = models.CharField(
         max_length=255,

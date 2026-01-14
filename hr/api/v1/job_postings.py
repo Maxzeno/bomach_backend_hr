@@ -4,7 +4,7 @@ from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
-from hr.models import JobPosting, Department
+from hr.models import JobPosting
 from hr.api.schemas import (
     JobPostingCreateSchema,
     JobPostingUpdateSchema,
@@ -33,7 +33,7 @@ def list_job_postings(
     List all job postings with optional filtering and search.
 
     Query Parameters:
-    - search: Search in job title, department name, and location
+    - search: Search in job title and location
     - location: Filter by location
     - status: Filter by status
     - job_type: Filter by job type
@@ -42,13 +42,12 @@ def list_job_postings(
     - limit: Number of items per page (default: 10)
     - offset: Starting position
     """
-    queryset = JobPosting.objects.select_related('department').all()
+    queryset = JobPosting.objects.all()
 
     # Search functionality
     if search:
         queryset = queryset.filter(
             Q(job_title__icontains=search) |
-            Q(department__name__icontains=search) |
             Q(location__icontains=search)
         )
 
@@ -76,10 +75,7 @@ def get_job_posting(request, job_posting_id: int):
     """
     Get a single job posting by ID.
     """
-    job_posting = get_object_or_404(
-        JobPosting.objects.select_related('department'),
-        id=job_posting_id
-    )
+    job_posting = get_object_or_404(JobPosting, id=job_posting_id)
     return job_posting
 
 
@@ -88,12 +84,7 @@ def create_job_posting(request, payload: JobPostingCreateSchema):
     """
     Create a new job posting.
     """
-    data = payload.model_dump(exclude={'department_id'})
-
-    # Get the department
-    department = get_object_or_404(Department, id=payload.department_id)
-    data['department'] = department
-
+    data = payload.model_dump()
     job_posting = JobPosting.objects.create(**data)
     return 201, job_posting
 
@@ -105,12 +96,7 @@ def update_job_posting(request, job_posting_id: int, payload: JobPostingUpdateSc
     """
     job_posting = get_object_or_404(JobPosting, id=job_posting_id)
 
-    update_data = payload.model_dump(exclude_unset=True, exclude={'department_id'})
-
-    # Handle department update if provided
-    if 'department_id' in payload.model_dump(exclude_unset=True):
-        department = get_object_or_404(Department, id=payload.department_id)
-        job_posting.department = department
+    update_data = payload.model_dump(exclude_unset=True)
 
     for attr, value in update_data.items():
         setattr(job_posting, attr, value)
@@ -126,12 +112,7 @@ def partial_update_job_posting(request, job_posting_id: int, payload: JobPosting
     """
     job_posting = get_object_or_404(JobPosting, id=job_posting_id)
 
-    update_data = payload.model_dump(exclude_unset=True, exclude={'department_id'})
-
-    # Handle department update if provided
-    if 'department_id' in payload.model_dump(exclude_unset=True):
-        department = get_object_or_404(Department, id=payload.department_id)
-        job_posting.department = department
+    update_data = payload.model_dump(exclude_unset=True)
 
     for attr, value in update_data.items():
         setattr(job_posting, attr, value)
@@ -185,15 +166,14 @@ def get_job_postings_summary(request):
 def get_filter_options(request):
     """
     Get available filter options for job postings.
-    Returns unique values for locations, departments, and available choices for status and job_type.
+    Returns unique values for locations, department IDs, and available choices for status and job_type.
     """
     locations = list(JobPosting.objects.values_list('location', flat=True).distinct())
-    departments = Department.objects.filter(is_active=True).values('id', 'name')
-    departments_list = [{'id': d['id'], 'name': d['name']} for d in departments]
+    department_ids = list(JobPosting.objects.values_list('department_id', flat=True).distinct())
 
     return {
         'locations': locations,
-        'departments': departments_list,
+        'department_ids': department_ids,
         'statuses': [choice[0] for choice in JobPosting.Status.choices],
         'job_types': [choice[0] for choice in JobPosting.JobType.choices],
     }

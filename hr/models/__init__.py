@@ -1,6 +1,4 @@
 from .base import BaseModel
-from .department import Department
-from .sub_department import SubDepartment
 from .job_posting import JobPosting
 from .applicant import Applicant
 from .leave_request import LeaveRequest
@@ -14,4 +12,4 @@ from .scorecard import Scorecard
 from .award import Award
 from .leaderboard import PerformanceLeaderboard
 
-__all__ = ['BaseModel', 'Department', 'SubDepartment', 'JobPosting', 'Applicant', 'LeaveRequest', 'PerformanceReview', 'Payroll', 'TrainingProgram', 'Associate', 'Asset', 'DailyWorkReport', 'Scorecard', 'Award', 'PerformanceLeaderboard']
+__all__ = ['BaseModel', 'JobPosting', 'Applicant', 'LeaveRequest', 'PerformanceReview', 'Payroll', 'TrainingProgram', 'Associate', 'Asset', 'DailyWorkReport', 'Scorecard', 'Award', 'PerformanceLeaderboard']

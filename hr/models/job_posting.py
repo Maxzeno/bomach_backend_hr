@@ -1,6 +1,5 @@
 from django.db import models
 from .base import BaseModel
-from .department import Department
 
 
 class JobPosting(BaseModel):
@@ -23,10 +22,12 @@ class JobPosting(BaseModel):
         CANCELLED = 'Cancelled', 'Cancelled'
 
     job_title = models.CharField(max_length=255)
-    department = models.ForeignKey(
-        Department,
-        on_delete=models.PROTECT,
-        related_name='job_postings'
+    department_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Department ID from department microservice"
     )
     location = models.CharField(max_length=255)
     job_type = models.CharField(
@@ -54,7 +55,7 @@ class JobPosting(BaseModel):
         verbose_name_plural = 'Job Postings'
 
     def __str__(self):
-        return f"{self.job_title} - {self.department.name}"
+        return f"{self.job_title} - {self.department_id}"
 
     def increment_applicants(self):
         """Increment the applicants count"""

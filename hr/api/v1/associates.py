@@ -2,7 +2,7 @@ from typing import List, Optional
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from ninja import Router, Query
-from hr.models import Associate, Department
+from hr.models import Associate
 from hr.api.schemas import (
     AssociateCreateSchema,
     AssociateUpdateSchema,
@@ -18,13 +18,7 @@ router = Router(tags=['Associates'])
 @router.post("/", response={201: AssociateResponseSchema})
 def create_associate(request, payload: AssociateCreateSchema):
     """Create a new associate"""
-    data = payload.model_dump(exclude={'department_id'})
-
-    # Handle department relationship
-    if payload.department_id:
-        department = get_object_or_404(Department, id=payload.department_id)
-        data['department'] = department
-
+    data = payload.model_dump()
     associate = Associate.objects.create(**data)
     return 201, associate
 
@@ -37,7 +31,7 @@ def list_associates(
     filters: AssociateFilterSchema = Query(...)
 ):
     """List all associates with search and filters"""
-    associates = Associate.objects.select_related('department').all()
+    associates = Associate.objects.all()
 
     # Search functionality (by name, role, or company)
     if search:
@@ -78,7 +72,7 @@ def list_associates(
 @router.get("/{associate_id}", response=AssociateResponseSchema)
 def get_associate(request, associate_id: int):
     """Get a single associate by ID"""
-    associate = get_object_or_404(Associate.objects.select_related('department'), id=associate_id)
+    associate = get_object_or_404(Associate, id=associate_id)
     return associate
 
 
@@ -87,16 +81,7 @@ def update_associate(request, associate_id: int, payload: AssociateUpdateSchema)
     """Update an associate"""
     associate = get_object_or_404(Associate, id=associate_id)
 
-    update_data = payload.model_dump(exclude_unset=True, exclude={'department_id'})
-
-    # Handle department relationship
-    if 'department_id' in payload.model_dump(exclude_unset=True):
-        dept_id = payload.department_id
-        if dept_id:
-            department = get_object_or_404(Department, id=dept_id)
-            update_data['department'] = department
-        else:
-            update_data['department'] = None
+    update_data = payload.model_dump(exclude_unset=True)
 
     # Validate date logic if both dates are being updated
     start_date = update_data.get('contract_start_date', associate.contract_start_date)

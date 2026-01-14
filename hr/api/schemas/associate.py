@@ -5,12 +5,6 @@ from decimal import Decimal
 from pydantic import validator, EmailStr
 
 
-class DepartmentMinimalSchema(Schema):
-    """Minimal department info for nested responses"""
-    id: int
-    name: str
-
-
 class AssociateCreateSchema(Schema):
     # Personal Information
     full_name: str
@@ -21,7 +15,7 @@ class AssociateCreateSchema(Schema):
     # Professional Information
     company_name: str
     role_position: str
-    department_id: Optional[int] = None
+    department_id: Optional[str] = None
     specialization: Optional[str] = None
 
     # Contract Information
@@ -76,7 +70,7 @@ class AssociateUpdateSchema(Schema):
     # Professional Information
     company_name: Optional[str] = None
     role_position: Optional[str] = None
-    department_id: Optional[int] = None
+    department_id: Optional[str] = None
     specialization: Optional[str] = None
 
     # Contract Information
@@ -131,7 +125,7 @@ class AssociateResponseSchema(Schema):
     # Professional Information
     company_name: str
     role_position: str
-    department: Optional[DepartmentMinimalSchema] = None
+    department_id: Optional[str] = None
     specialization: Optional[str] = None
 
     # Contract Information
@@ -187,7 +181,7 @@ class AssociateFilterSchema(Schema):
     company_name: Optional[str] = None
     role_position: Optional[str] = None
     status: Optional[str] = None
-    department_id: Optional[int] = None
+    department_id: Optional[str] = None
     contract_start_date_from: Optional[date] = None
     contract_start_date_to: Optional[date] = None
     contract_end_date_from: Optional[date] = None

@@ -1,13 +1,12 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field
-from .department import DepartmentMinimalSchema
 
 
 class JobPostingCreateSchema(BaseModel):
     """Schema for creating a new job posting"""
     job_title: str = Field(..., min_length=1, max_length=255)
-    department_id: int = Field(..., description="ID of the department")
+    department_id: Optional[str] = Field(None, description="Department ID from department microservice")
     location: str = Field(..., min_length=1, max_length=255)
     job_type: str = Field(..., description="Job type: Full-Time, Part-Time, Contract, Internship, Temporary")
     status: Optional[str] = Field(default="Draft", description="Status: Draft, Pending, Active, Closed, Cancelled")
@@ -22,7 +21,7 @@ class JobPostingCreateSchema(BaseModel):
 class JobPostingUpdateSchema(BaseModel):
     """Schema for updating a job posting"""
     job_title: Optional[str] = Field(None, min_length=1, max_length=255)
-    department_id: Optional[int] = Field(None, description="ID of the department")
+    department_id: Optional[str] = Field(None, description="Department ID from department microservice")
     location: Optional[str] = Field(None, min_length=1, max_length=255)
     job_type: Optional[str] = None
     status: Optional[str] = None
@@ -43,7 +42,7 @@ class JobPostingResponseSchema(BaseModel):
     """Schema for job posting response"""
     id: int
     job_title: str
-    department: DepartmentMinimalSchema
+    department_id: Optional[str] = None
     location: str
     job_type: str
     status: str
@@ -65,7 +64,7 @@ class JobPostingListItemSchema(BaseModel):
     """Schema for job posting in list view (minimal data)"""
     id: int
     job_title: str
-    department: DepartmentMinimalSchema
+    department_id: Optional[str] = None
     location: str
     job_type: str
     status: str

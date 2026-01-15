@@ -1,13 +1,11 @@
 from datetime import date, datetime
 from typing import Optional, Literal
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 
 
 class LeaveRequestCreateSchema(BaseModel):
     """Schema for creating a new leave request"""
     employee_id: str = Field(..., min_length=1, max_length=50)
-    employee_name: str = Field(..., min_length=1, max_length=255)
-    employee_email: Optional[EmailStr] = None
     leave_type: Literal[
         'Sick Leave',
         'Annual Leave',
@@ -32,8 +30,6 @@ class LeaveRequestCreateSchema(BaseModel):
 class LeaveRequestUpdateSchema(BaseModel):
     """Schema for updating a leave request"""
     employee_id: Optional[str] = Field(None, min_length=1, max_length=50)
-    employee_name: Optional[str] = Field(None, min_length=1, max_length=255)
-    employee_email: Optional[EmailStr] = None
     leave_type: Optional[Literal[
         'Sick Leave',
         'Annual Leave',
@@ -67,8 +63,6 @@ class LeaveRequestResponseSchema(BaseModel):
     """Schema for leave request response"""
     id: int
     employee_id: str
-    employee_name: str
-    employee_email: Optional[str] = None
     leave_type: str
     start_date: date
     end_date: date
@@ -89,8 +83,6 @@ class LeaveRequestListItemSchema(BaseModel):
     """Schema for leave request in list view"""
     id: int
     employee_id: str
-    employee_name: str
-    employee_email: Optional[str] = None
     leave_type: str
     start_date: date
     end_date: date

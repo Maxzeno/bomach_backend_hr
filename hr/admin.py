@@ -86,7 +86,6 @@ class ApplicantAdmin(admin.ModelAdmin):
 class LeaveRequestAdmin(admin.ModelAdmin):
     list_display = [
         'employee_id',
-        'employee_name',
         'leave_type',
         'start_date',
         'end_date',
@@ -95,7 +94,7 @@ class LeaveRequestAdmin(admin.ModelAdmin):
         'created_at',
     ]
     list_filter = ['status', 'leave_type', 'start_date', 'created_at']
-    search_fields = ['employee_id', 'employee_name', 'employee_email', 'reason']
+    search_fields = ['employee_id', 'reason']
     readonly_fields = ['created_at', 'updated_at', 'duration_days']
     list_editable = ['status']
     ordering = ['-created_at']
@@ -103,7 +102,7 @@ class LeaveRequestAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Employee Information', {
-            'fields': ('employee_id', 'employee_name', 'employee_email')
+            'fields': ('employee_id',)
         }),
         ('Leave Details', {
             'fields': ('leave_type', 'start_date', 'end_date', 'reason', 'duration_days')
@@ -126,7 +125,6 @@ class LeaveRequestAdmin(admin.ModelAdmin):
 class PerformanceReviewAdmin(admin.ModelAdmin):
     list_display = [
         'employee_id',
-        'employee_name',
         'reviewer_name',
         'review_period',
         'overall_rating',
@@ -135,7 +133,7 @@ class PerformanceReviewAdmin(admin.ModelAdmin):
         'created_at',
     ]
     list_filter = ['overall_rating', 'goals_met', 'review_date', 'review_period', 'created_at']
-    search_fields = ['employee_id', 'employee_name', 'employee_email', 'reviewer_id', 'reviewer_name']
+    search_fields = ['employee_id', 'reviewer_id', 'reviewer_name']
     readonly_fields = ['created_at', 'updated_at', 'rating_display']
     list_editable = ['goals_met']
     ordering = ['-review_date', '-created_at']
@@ -143,7 +141,7 @@ class PerformanceReviewAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Employee Information', {
-            'fields': ('employee_id', 'employee_name', 'employee_email')
+            'fields': ('employee_id',)
         }),
         ('Reviewer Information', {
             'fields': ('reviewer_id', 'reviewer_name')
@@ -165,7 +163,6 @@ class PerformanceReviewAdmin(admin.ModelAdmin):
 class PayrollAdmin(admin.ModelAdmin):
     list_display = [
         'employee_id',
-        'employee_name',
         'payroll_period',
         'gross_salary',
         'net_salary',
@@ -174,7 +171,7 @@ class PayrollAdmin(admin.ModelAdmin):
         'created_at',
     ]
     list_filter = ['status', 'payroll_period', 'disbursement_date', 'created_at']
-    search_fields = ['employee_id', 'employee_name', 'employee_email']
+    search_fields = ['employee_id']
     readonly_fields = ['created_at', 'updated_at', 'total_allowances', 'total_deductions', 'net_salary']
     list_editable = ['status']
     ordering = ['-disbursement_date', '-created_at']
@@ -182,7 +179,7 @@ class PayrollAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Employee Information', {
-            'fields': ('employee_id', 'employee_name', 'employee_email')
+            'fields': ('employee_id',)
         }),
         ('Payroll Details', {
             'fields': ('payroll_period', 'gross_salary', 'disbursement_date', 'status')
@@ -319,9 +316,9 @@ class AssetAdmin(admin.ModelAdmin):
 
 @admin.register(DailyWorkReport)
 class DailyWorkReportAdmin(admin.ModelAdmin):
-    list_display = ['id', 'employee_name', 'employee_email', 'date', 'hours_worked', 'mood', 'status', 'created_at']
+    list_display = ['id', 'date', 'hours_worked', 'mood', 'status', 'created_at']
     list_filter = ['status', 'mood', 'date', 'created_at']
-    search_fields = ['employee_name', 'employee_email']
+    search_fields = []
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-date', '-created_at']
     list_editable = ['status']

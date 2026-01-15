@@ -28,8 +28,6 @@ class LeaveRequest(BaseModel):
 
     # Employee Information
     employee_id = models.CharField(max_length=50, db_index=True)
-    employee_name = models.CharField(max_length=255)
-    employee_email = models.EmailField(max_length=255, blank=True, null=True)
 
     # Leave Details
     leave_type = models.CharField(max_length=50, choices=LEAVE_TYPE_CHOICES)
@@ -61,7 +59,7 @@ class LeaveRequest(BaseModel):
         ]
 
     def __str__(self):
-        return f"{self.employee_name} - {self.leave_type} ({self.start_date} to {self.end_date})"
+        return f"{self.leave_type} ({self.start_date} to {self.end_date})"
 
     @property
     def duration_days(self):
@@ -82,10 +80,6 @@ class LeaveRequest(BaseModel):
         if self.employee_id:
             try:
                 employee_info = validate_employee_id(self.employee_id)
-                # Update cached fields with validated data
-                if employee_info:
-                    self.employee_name = employee_info.get('full_name', self.employee_name)
-                    self.employee_email = employee_info.get('email', self.employee_email)
             except ValidationError as e:
                 errors['employee_id'] = e.message
 

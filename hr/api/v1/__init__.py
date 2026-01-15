@@ -9,6 +9,7 @@ from .associates import router as associates_router
 from .assets import router as assets_router
 from .award import router as award_router
 from .work_reports import router as work_reports_router
+from .disciplinary_cases import router as disciplinary_cases_router
 from ninja.errors import ValidationError
 from django.http import JsonResponse
 
@@ -27,3 +28,4 @@ v1_router.add_router('/associates', associates_router)
 v1_router.add_router('/assets', assets_router)
 v1_router.add_router('/awards', award_router)
 v1_router.add_router('/work-reports', work_reports_router)
+v1_router.add_router('/disciplinary-cases', disciplinary_cases_router)

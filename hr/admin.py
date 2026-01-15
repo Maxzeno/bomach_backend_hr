@@ -125,17 +125,15 @@ class LeaveRequestAdmin(admin.ModelAdmin):
 class PerformanceReviewAdmin(admin.ModelAdmin):
     list_display = [
         'employee_id',
-        'reviewer_name',
         'review_period',
         'overall_rating',
         'review_date',
-        'goals_met',
         'created_at',
     ]
-    list_filter = ['overall_rating', 'goals_met', 'review_date', 'review_period', 'created_at']
-    search_fields = ['employee_id', 'reviewer_id', 'reviewer_name']
+    list_filter = ['overall_rating', 'review_date', 'review_period', 'created_at']
+    search_fields = ['employee_id', 'reviewer_id']
     readonly_fields = ['created_at', 'updated_at', 'rating_display']
-    list_editable = ['goals_met']
+    list_editable = []
     ordering = ['-review_date', '-created_at']
     date_hierarchy = 'review_date'
 

@@ -45,7 +45,6 @@ class JobPostingAdmin(admin.ModelAdmin):
 @admin.register(Applicant)
 class ApplicantAdmin(admin.ModelAdmin):
     list_display = [
-        'application_id',
         'full_name',
         'email',
         'phone',
@@ -56,8 +55,8 @@ class ApplicantAdmin(admin.ModelAdmin):
         'created_at',
     ]
     list_filter = ['stage', 'status', 'job_posting', 'created_at']
-    search_fields = ['application_id', 'first_name', 'last_name', 'email', 'phone']
-    readonly_fields = ['application_id', 'created_at', 'updated_at']
+    search_fields = ['first_name', 'last_name', 'email', 'phone']
+    readonly_fields = ['created_at', 'updated_at']
     list_editable = ['stage', 'status', 'rating']
     ordering = ['-created_at']
     date_hierarchy = 'created_at'
@@ -65,7 +64,7 @@ class ApplicantAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Application Info', {
-            'fields': ('application_id', 'job_posting')
+            'fields': ('job_posting',)
         }),
         ('Personal Information', {
             'fields': ('first_name', 'last_name', 'email', 'phone')

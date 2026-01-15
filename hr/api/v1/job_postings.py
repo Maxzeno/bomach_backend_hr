@@ -18,7 +18,7 @@ from hr.api.schemas import (
 router = Router(tags=['Job Postings'])
 
 
-@router.get('/', response=List[JobPostingListItemSchema], auth=None)
+@router.get('/', response=List[JobPostingListItemSchema])
 @paginate(LimitOffsetPagination, page_size=10)
 def list_job_postings(
     request,
@@ -65,7 +65,7 @@ def get_job_posting(request, job_posting_id: int):
     return job_posting
 
 
-@router.post('/', response={201: JobPostingResponseSchema}, auth=None)
+@router.post('/', response={201: JobPostingResponseSchema})
 def create_job_posting(request, payload: JobPostingCreateSchema):
     """
     Create a new job posting.

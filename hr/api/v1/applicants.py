@@ -20,7 +20,7 @@ from hr.api.schemas import (
 router = Router(tags=['Applicants'])
 
 
-@router.get('/', response=List[ApplicantListItemSchema])
+@router.get('/', response=List[ApplicantListItemSchema], auth=None)
 @paginate(LimitOffsetPagination, page_size=10)
 def list_applicants(
     request,
@@ -29,18 +29,7 @@ def list_applicants(
     stage: Optional[str] = None,
     status: Optional[str] = None,
 ):
-    """
-    List all applicants with optional filtering and search.
-
-    Query Parameters:
-    - search: Search in applicant name, email, phone, or application ID
-    - job_posting_id: Filter by job posting ID
-    - stage: Filter by application stage
-    - status: Filter by application status
-    - limit: Number of items per page (default: 10)
-    - offset: Starting position
-    """
-    queryset = Applicant.objects.select_related('job_posting', 'job_posting__department').all()
+    queryset = Applicant.objects.select_related('job_posting').all()
 
     # Search functionality
     if search:
@@ -49,7 +38,6 @@ def list_applicants(
             Q(last_name__icontains=search) |
             Q(email__icontains=search) |
             Q(phone__icontains=search) |
-            Q(application_id__icontains=search) |
             Q(job_posting__job_title__icontains=search)
         )
 
@@ -78,7 +66,7 @@ def get_applicant(request, applicant_id: int):
     return applicant
 
 
-@router.post('/', response={201: ApplicantResponseSchema})
+@router.post('/', response={201: ApplicantResponseSchema}, auth=None)
 def create_applicant(request, payload: ApplicantCreateSchema):
     """
     Create a new applicant.
@@ -199,61 +187,3 @@ def delete_applicant(request, applicant_id: int):
     job_posting.decrement_applicants()
 
     return 200, {'message': f'Applicant "{applicant_name}" deleted successfully'}
-
-
-@router.get('/stats/summary', response=dict)
-def get_applicants_summary(request):
-    """
-    Get summary statistics for applicants.
-    """
-    total = Applicant.objects.count()
-
-    # Count by stage
-    applied = Applicant.objects.filter(stage='Applied').count()
-    screening = Applicant.objects.filter(stage='Screening').count()
-    interview = Applicant.objects.filter(stage='Interview').count()
-    offered = Applicant.objects.filter(stage='Offered').count()
-    rejected = Applicant.objects.filter(stage='Rejected').count()
-
-    # Count by status
-    new = Applicant.objects.filter(status='New').count()
-    in_review = Applicant.objects.filter(status='In Review').count()
-    shortlisted = Applicant.objects.filter(status='Shortlisted').count()
-    hired = Applicant.objects.filter(status='Hired').count()
-    rejected_status = Applicant.objects.filter(status='Rejected').count()
-
-    return {
-        'total': total,
-        'by_stage': {
-            'applied': applied,
-            'screening': screening,
-            'interview': interview,
-            'offered': offered,
-            'rejected': rejected,
-        },
-        'by_status': {
-            'new': new,
-            'in_review': in_review,
-            'shortlisted': shortlisted,
-            'hired': hired,
-            'rejected': rejected_status,
-        },
-    }
-
-
-@router.get('/filters/options', response=dict)
-def get_filter_options(request):
-    """
-    Get available filter options for applicants.
-    Returns available choices for stage and status, and active job postings.
-    """
-    from hr.models import JobPosting
-
-    job_postings = JobPosting.objects.filter(is_active=True).values('id', 'job_title')
-    job_postings_list = [{'id': jp['id'], 'job_title': jp['job_title']} for jp in job_postings]
-
-    return {
-        'job_postings': job_postings_list,
-        'stages': [choice[0] for choice in Applicant.Stage.choices],
-        'statuses': [choice[0] for choice in Applicant.Status.choices],
-    }

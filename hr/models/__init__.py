@@ -9,4 +9,3 @@ from .associate import Associate
 from .asset import Asset
 from .work_report import DailyWorkReport
 from .award import Award
-from .leaderboard import PerformanceLeaderboard

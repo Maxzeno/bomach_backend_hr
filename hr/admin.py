@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     JobPosting, Applicant, LeaveRequest,
     PerformanceReview, Payroll, TrainingProgram, Associate, Asset,
-    DailyWorkReport, Award, PerformanceLeaderboard
+    DailyWorkReport, Award
 )
 
 
@@ -323,7 +323,6 @@ class DailyWorkReportAdmin(admin.ModelAdmin):
 class AwardAdmin(admin.ModelAdmin):
     list_display = [
         'id',
-        'associate',
         'title',
         'category',
         'date_awarded',
@@ -331,24 +330,7 @@ class AwardAdmin(admin.ModelAdmin):
         'created_at',
     ]
     list_filter = ['category', 'rank_level', 'date_awarded', 'created_at']
-    search_fields = ['associate__full_name', 'associate__associate_id', 'title']
+    search_fields = ['title']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-date_awarded']
-    autocomplete_fields = ['associate']
-
-
-@admin.register(PerformanceLeaderboard)
-class PerformanceLeaderboardAdmin(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'associate',
-        'month',
-        'score',
-        'rank',
-        'created_at',
-    ]
-    list_filter = ['month', 'created_at']
-    search_fields = ['associate__full_name', 'associate__associate_id']
-    readonly_fields = ['created_at', 'updated_at']
-    ordering = ['-month', 'rank']
-    autocomplete_fields = ['associate']
+    autocomplete_fields = []

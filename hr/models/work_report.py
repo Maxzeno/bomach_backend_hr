@@ -101,7 +101,7 @@ class DailyWorkReport(BaseModel):
         """
         Override save to ensure validation happens.
         """
-        # if not kwargs.pop('skip_validation', False):
-        #     self.full_clean()
+        if not kwargs.pop('skip_validation', False):
+            self.full_clean()
 
         super().save(*args, **kwargs)

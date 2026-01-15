@@ -16,7 +16,9 @@ class ResponseFormaterMiddleware:
             if response.status_code == 422:
                 json_val = json.loads(response.content)
                 print(f'422 - {json_val}')
-                msg = json_val["detail"][0]["msg"]
+                item_error = json_val["detail"][0]
+                msg = item_error['msg']
+    
                 return JsonResponse({"detail": msg or "Invalid data passed"}, status=422)
                 
             if response.status_code == 500:

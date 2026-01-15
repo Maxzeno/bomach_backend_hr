@@ -19,8 +19,6 @@ class Payroll(BaseModel):
 
     # Employee Information
     employee_id = models.CharField(max_length=50, db_index=True)
-    employee_name = models.CharField(max_length=255)
-    employee_email = models.EmailField(max_length=255, blank=True, null=True)
 
     # Payroll Details
     payroll_period = models.CharField(
@@ -81,7 +79,7 @@ class Payroll(BaseModel):
         unique_together = [['employee_id', 'payroll_period']]
 
     def __str__(self):
-        return f"{self.employee_name} - {self.payroll_period} (Net: {self.net_salary})"
+        return f"{self.payroll_period} (Net: {self.net_salary})"
 
     @property
     def total_allowances(self):
@@ -104,25 +102,14 @@ class Payroll(BaseModel):
         return self.gross_salary + total_allowances - total_deductions
 
     def clean(self):
-        """
-        Validate cross-service references before saving.
-        """
         super().clean()
-        errors = {}
 
         # Validate employee_id
         if self.employee_id:
             try:
                 employee_info = validate_employee_id(self.employee_id)
-                # Update cached fields with validated data
-                if employee_info:
-                    self.employee_name = employee_info.get('full_name', self.employee_name)
-                    self.employee_email = employee_info.get('email', self.employee_email)
             except ValidationError as e:
-                errors['employee_id'] = e.message
-
-        if errors:
-            raise ValidationError(errors)
+                ValidationError(e.message)
 
     def save(self, *args, **kwargs):
         """Override save to validate and auto-calculate net salary"""

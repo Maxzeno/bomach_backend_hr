@@ -7,8 +7,6 @@ from pydantic import validator
 
 class PayrollCreateSchema(Schema):
     employee_id: str
-    employee_name: str
-    employee_email: Optional[str] = None
     payroll_period: str
     gross_salary: Decimal = Field(..., gt=0, decimal_places=2)
     allowances: Optional[Dict[str, float]] = Field(default_factory=dict)
@@ -33,8 +31,6 @@ class PayrollCreateSchema(Schema):
 
 
 class PayrollUpdateSchema(Schema):
-    employee_name: Optional[str] = None
-    employee_email: Optional[str] = None
     payroll_period: Optional[str] = None
     gross_salary: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
     allowances: Optional[Dict[str, float]] = None
@@ -62,8 +58,6 @@ class PayrollUpdateSchema(Schema):
 class PayrollResponseSchema(Schema):
     id: int
     employee_id: str
-    employee_name: str
-    employee_email: Optional[str] = None
     payroll_period: str
     gross_salary: Decimal
     allowances: Dict[str, float]
@@ -89,8 +83,6 @@ class PayrollListSchema(Schema):
     """Simplified schema for list view"""
     id: int
     employee_id: str
-    employee_name: str
-    employee_email: Optional[str] = None
     payroll_period: str
     net_salary: Decimal
     disbursement_date: date
@@ -99,7 +91,6 @@ class PayrollListSchema(Schema):
 
 class PayrollFilterSchema(Schema):
     employee_id: Optional[str] = None
-    employee_name: Optional[str] = None
     payroll_period: Optional[str] = None
     status: Optional[str] = None
     disbursement_date_from: Optional[date] = None

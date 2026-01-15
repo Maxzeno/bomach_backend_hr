@@ -9,7 +9,6 @@ from hr.api.schemas import (
     PayrollResponseSchema,
     PayrollListSchema,
     PayrollFilterSchema,
-    PaginatedResponse,
 )
 from ninja.pagination import paginate, LimitOffsetPagination
 
@@ -35,15 +34,11 @@ def list_payroll(
 
     # Search functionality (by name or employee ID)
     if search:
-        payroll_records = payroll_records.filter(
-            Q(employee_name__icontains=search) | Q(employee_id__icontains=search)
-        )
+        payroll_records = payroll_records.filter(Q(employee_id__icontains=search))
 
     # Filters from schema
     if filters.employee_id:
         payroll_records = payroll_records.filter(employee_id=filters.employee_id)
-    if filters.employee_name:
-        payroll_records = payroll_records.filter(employee_name__icontains=filters.employee_name)
     if filters.payroll_period:
         payroll_records = payroll_records.filter(payroll_period__icontains=filters.payroll_period)
     if filters.status:

@@ -10,9 +10,7 @@ router = Router(tags=["Awards"])
 
 @router.post("/", response=AwardSchema)
 def create_award(request, payload: AwardCreateSchema):
-    associate = get_object_or_404(Associate, associate_id=payload.associate_id)
     award = Award.objects.create(
-        associate=associate,
         title=payload.title,
         category=payload.category,
         date_awarded=payload.date_awarded,
@@ -23,12 +21,10 @@ def create_award(request, payload: AwardCreateSchema):
 
 @router.get("/", response=List[AwardSchema])
 @paginate(LimitOffsetPagination, page_size=10)
-def list_awards(request, year: int = None, associate_id: str = None):
+def list_awards(request, year: int = None):
     qs = Award.objects.all()
     if year:
         qs = qs.filter(date_awarded__year=year)
-    if associate_id:
-        qs = qs.filter(associate__associate_id=associate_id)
     return qs
 
 @router.get("/{award_id}", response=AwardSchema)

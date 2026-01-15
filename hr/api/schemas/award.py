@@ -5,8 +5,6 @@ from pydantic import Field
 
 class AwardSchema(Schema):
     id: int
-    associate_id: str
-    associate_name: str = Field(..., alias='associate.full_name')
     title: str
     category: str
     date_awarded: date
@@ -19,7 +17,6 @@ class AwardSchema(Schema):
         from_attributes = True
 
 class AwardCreateSchema(Schema):
-    associate_id: str
     title: str
     category: str
     date_awarded: date

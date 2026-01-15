@@ -18,42 +18,28 @@ from hr.api.schemas import (
 router = Router(tags=['Job Postings'])
 
 
-@router.get('/', response=List[JobPostingListItemSchema])
+@router.get('/', response=List[JobPostingListItemSchema], auth=None)
 @paginate(LimitOffsetPagination, page_size=10)
 def list_job_postings(
     request,
     search: Optional[str] = None,
-    location: Optional[str] = None,
+    branch_id: Optional[str] = None,
     status: Optional[str] = None,
     job_type: Optional[str] = None,
     department_id: Optional[int] = None,
     is_active: Optional[bool] = None,
 ):
-    """
-    List all job postings with optional filtering and search.
-
-    Query Parameters:
-    - search: Search in job title and location
-    - location: Filter by location
-    - status: Filter by status
-    - job_type: Filter by job type
-    - department_id: Filter by department ID
-    - is_active: Filter by active status
-    - limit: Number of items per page (default: 10)
-    - offset: Starting position
-    """
     queryset = JobPosting.objects.all()
 
     # Search functionality
     if search:
         queryset = queryset.filter(
-            Q(job_title__icontains=search) |
-            Q(location__icontains=search)
+            Q(job_title__icontains=search)
         )
 
     # Filters
-    if location:
-        queryset = queryset.filter(location__iexact=location)
+    if branch_id:
+        queryset = queryset.filter(branch_id__iexact=branch_id)
 
     if status:
         queryset = queryset.filter(status=status)
@@ -79,7 +65,7 @@ def get_job_posting(request, job_posting_id: int):
     return job_posting
 
 
-@router.post('/', response={201: JobPostingResponseSchema})
+@router.post('/', response={201: JobPostingResponseSchema}, auth=None)
 def create_job_posting(request, payload: JobPostingCreateSchema):
     """
     Create a new job posting.
@@ -159,21 +145,4 @@ def get_job_postings_summary(request):
         'pending': pending,
         'closed': closed,
         'draft': draft,
-    }
-
-
-@router.get('/filters/options', response=dict)
-def get_filter_options(request):
-    """
-    Get available filter options for job postings.
-    Returns unique values for locations, department IDs, and available choices for status and job_type.
-    """
-    locations = list(JobPosting.objects.values_list('location', flat=True).distinct())
-    department_ids = list(JobPosting.objects.values_list('department_id', flat=True).distinct())
-
-    return {
-        'locations': locations,
-        'department_ids': department_ids,
-        'statuses': [choice[0] for choice in JobPosting.Status.choices],
-        'job_types': [choice[0] for choice in JobPosting.JobType.choices],
     }

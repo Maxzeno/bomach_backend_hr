@@ -7,7 +7,7 @@ class JobPostingCreateSchema(BaseModel):
     """Schema for creating a new job posting"""
     job_title: str = Field(..., min_length=1, max_length=255)
     department_id: Optional[str] = Field(None, description="Department ID from department microservice")
-    location: str = Field(..., min_length=1, max_length=255)
+    branch_id: str = Field(..., min_length=1, max_length=255)
     job_type: str = Field(..., description="Job type: Full-Time, Part-Time, Contract, Internship, Temporary")
     status: Optional[str] = Field(default="Draft", description="Status: Draft, Pending, Active, Closed, Cancelled")
     description: Optional[str] = None
@@ -22,7 +22,7 @@ class JobPostingUpdateSchema(BaseModel):
     """Schema for updating a job posting"""
     job_title: Optional[str] = Field(None, min_length=1, max_length=255)
     department_id: Optional[str] = Field(None, description="Department ID from department microservice")
-    location: Optional[str] = Field(None, min_length=1, max_length=255)
+    branch_id: Optional[str] = Field(None, min_length=1, max_length=255)
     job_type: Optional[str] = None
     status: Optional[str] = None
     description: Optional[str] = None
@@ -43,7 +43,7 @@ class JobPostingResponseSchema(BaseModel):
     id: int
     job_title: str
     department_id: Optional[str] = None
-    location: str
+    branch_id: str
     job_type: str
     status: str
     description: Optional[str] = None
@@ -65,7 +65,7 @@ class JobPostingListItemSchema(BaseModel):
     id: int
     job_title: str
     department_id: Optional[str] = None
-    location: str
+    branch_id: str
     job_type: str
     status: str
     applicants_count: int

@@ -29,7 +29,7 @@ class JobPosting(BaseModel):
         db_index=True,
         help_text="Department ID from department microservice"
     )
-    location = models.CharField(max_length=255)
+    branch_id = models.CharField(max_length=255)
     job_type = models.CharField(
         max_length=50,
         choices=JobType.choices,

@@ -11,15 +11,15 @@ class JobPostingAdmin(admin.ModelAdmin):
     list_display = [
         'job_title',
         'department_id',
-        'location',
+        'branch_id',
         'job_type',
         'status',
         'applicants_count',
         'is_active',
         'created_at',
     ]
-    list_filter = ['status', 'job_type', 'location', 'is_active', 'created_at']
-    search_fields = ['job_title', 'department_id', 'location', 'description']
+    list_filter = ['status', 'job_type', 'branch_id', 'is_active', 'created_at']
+    search_fields = ['job_title', 'department_id', 'branch_id', 'description']
     readonly_fields = ['created_at', 'updated_at', 'applicants_count']
     list_editable = ['status', 'is_active']
     ordering = ['-created_at']
@@ -27,7 +27,7 @@ class JobPostingAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('job_title', 'department_id', 'location', 'job_type', 'status', 'is_active')
+            'fields': ('job_title', 'department_id', 'branch_id', 'job_type', 'status', 'is_active')
         }),
         ('Job Details', {
             'fields': ('description', 'requirements', 'responsibilities', 'salary_range', 'deadline')

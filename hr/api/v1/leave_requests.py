@@ -19,7 +19,7 @@ from hr.api.schemas import (
 router = Router(tags=['Leave Requests'])
 
 
-@router.get('/', response=List[LeaveRequestListItemSchema])
+@router.get('/', response=List[LeaveRequestListItemSchema], auth=None)
 @paginate(LimitOffsetPagination, page_size=10)
 def list_leave_requests(
     request,
@@ -66,7 +66,7 @@ def get_leave_request(request, leave_request_id: int):
     return leave_request
 
 
-@router.post('/', response={201: LeaveRequestResponseSchema})
+@router.post('/', response={201: LeaveRequestResponseSchema}, auth=None)
 def create_leave_request(request, payload: LeaveRequestCreateSchema):
     """
     Create a new leave request.

@@ -18,13 +18,13 @@ class LeaveRequestCreateSchema(BaseModel):
     start_date: date = Field(..., description="Leave start date")
     end_date: date = Field(..., description="Leave end date")
     reason: str = Field(..., min_length=1, description="Reason for leave")
-    status: Optional[Literal['Pending', 'Approved', 'Rejected', 'Cancelled']] = Field(
-        default='Pending',
-        description="Leave request status"
-    )
-    approver_id: Optional[str] = Field(None, max_length=50)
-    approval_date: Optional[date] = None
-    rejection_reason: Optional[str] = None
+    # status: Optional[Literal['Pending', 'Approved', 'Rejected', 'Cancelled']] = Field(
+    #     default='Pending',
+    #     description="Leave request status"
+    # )
+    # approver_id: Optional[str] = Field(None, max_length=50)
+    # approval_date: Optional[date] = None
+    # rejection_reason: Optional[str] = None
 
 
 class LeaveRequestUpdateSchema(BaseModel):

@@ -20,7 +20,7 @@ from hr.api.schemas import (
 router = Router(tags=['Applicants'])
 
 
-@router.get('/', response=List[ApplicantListItemSchema], auth=None)
+@router.get('/', response=List[ApplicantListItemSchema])
 @paginate(LimitOffsetPagination, page_size=10)
 def list_applicants(
     request,
@@ -66,7 +66,7 @@ def get_applicant(request, applicant_id: int):
     return applicant
 
 
-@router.post('/', response={201: ApplicantResponseSchema}, auth=None)
+@router.post('/', response={201: ApplicantResponseSchema})
 def create_applicant(request, payload: ApplicantCreateSchema):
     """
     Create a new applicant.

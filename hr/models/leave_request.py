@@ -74,36 +74,34 @@ class LeaveRequest(BaseModel):
         Called by full_clean() and save().
         """
         super().clean()
-        errors = {}
 
         # Validate employee_id
         if self.employee_id:
             try:
-                employee_info = validate_employee_id(self.employee_id)
+                validate_employee_id(self.employee_id)
             except ValidationError as e:
-                errors['employee_id'] = e.message
-
+                raise ValidationError(e.message)
+                
         # Validate approver_id (optional field)
         if self.approver_id:
             try:
                 validate_employee_id(self.approver_id)
             except ValidationError as e:
-                errors['approver_id'] = e.message
+                raise ValidationError(e.message)
+                
 
         # Validate date logic
         if self.start_date and self.end_date:
             if self.end_date < self.start_date:
-                errors['end_date'] = "End date cannot be before start date"
+                raise ValidationError(e.message)
 
-        if errors:
-            raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
         """
         Override save to ensure validation happens.
         """
         # Skip validation if explicitly requested (for data migrations, etc.)
-        if not kwargs.pop('skip_validation', False):
-            self.full_clean()
+        # if not kwargs.pop('skip_validation', False):
+        #     self.full_clean()
 
         super().save(*args, **kwargs)

@@ -1,16 +1,13 @@
 from ninja import Schema
-from typing import Optional, List
+from typing import Optional
 from datetime import date, datetime
 from decimal import Decimal
-from uuid import UUID
 
 class AssetCreate(Schema):
     name: str
     asset_type: str
     branch: str
     assigned_to_id: Optional[str] = None
-    assigned_to_name: Optional[str] = None
-    assigned_to_email: Optional[str] = None
     department_id: Optional[str] = None
     purchase_date: Optional[date] = None
     value: Optional[Decimal] = None
@@ -27,8 +24,6 @@ class AssetUpdate(Schema):
     asset_type: Optional[str] = None
     branch: Optional[str] = None
     assigned_to_id: Optional[str] = None
-    assigned_to_name: Optional[str] = None
-    assigned_to_email: Optional[str] = None
     department_id: Optional[str] = None
     purchase_date: Optional[date] = None
     value: Optional[Decimal] = None
@@ -41,14 +36,11 @@ class AssetUpdate(Schema):
     manufacturer: Optional[str] = None
 
 class AssetOut(Schema):
-    id: UUID
     asset_id: str
     name: str
     asset_type: str
     branch: str
     assigned_to_id: Optional[str] = None
-    assigned_to_name: Optional[str] = None
-    assigned_to_email: Optional[str] = None
     department_id: Optional[str] = None
     purchase_date: Optional[date] = None
     value: Optional[Decimal] = None

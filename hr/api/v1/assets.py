@@ -55,4 +55,4 @@ def update_asset(request, asset_id: int, payload: AssetUpdate):
 def delete_asset(request, asset_id: int):
     asset = get_object_or_404(Asset, id=asset_id)
     asset.delete()
-    return {"success": True}
+    return {"detail": "Deleted successfully"}

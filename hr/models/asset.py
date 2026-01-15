@@ -25,13 +25,6 @@ class Asset(BaseModel):
         ('Lost/Stolen', 'Lost/Stolen'),
     ]
 
-    # Asset Information
-    asset_id = models.CharField(
-        max_length=50,
-        unique=True,
-        db_index=True,
-        help_text="Unique Asset ID (e.g., AST-001)"
-    )
     name = models.CharField(max_length=255, help_text="Name of the asset")
     asset_type = models.CharField(
         max_length=50,
@@ -52,17 +45,6 @@ class Asset(BaseModel):
         null=True,
         db_index=True,
         help_text="Employee ID from main auth service"
-    )
-    assigned_to_name = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text="Cached name of the person assigned to"
-    )
-    assigned_to_email = models.EmailField(
-        blank=True,
-        null=True,
-        help_text="Cached email of the person assigned to"
     )
     department_id = models.CharField(
         max_length=255,
@@ -95,8 +77,7 @@ class Asset(BaseModel):
     notes = models.TextField(blank=True, null=True)
 
     # Documents
-    documents = models.FileField(
-        upload_to='assets/documents/',
+    documents = models.URLField(
         blank=True,
         null=True,
         help_text="Upload invoice, warranty, manual, etc."
@@ -129,10 +110,6 @@ class Asset(BaseModel):
         if self.assigned_to_id:
             try:
                 employee_info = validate_employee_id(self.assigned_to_id)
-                # Update cached fields with validated data
-                if employee_info:
-                    self.assigned_to_name = employee_info.get('full_name', self.assigned_to_name)
-                    self.assigned_to_email = employee_info.get('email', self.assigned_to_email)
             except ValidationError as e:
                 errors['assigned_to_id'] = e.message
 

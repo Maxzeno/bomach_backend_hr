@@ -14,5 +14,3 @@ api = NinjaAPI(
 
 # Add version routers
 api.add_router('/v1', v1_router)
-
-__all__ = ['api']

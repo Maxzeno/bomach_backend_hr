@@ -296,29 +296,27 @@ class AssociateAdmin(admin.ModelAdmin):
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
     list_display = [
-        'asset_id',
         'name',
         'asset_type',
         'branch',
         'status',
-        'assigned_to_name',
         'value',
         'created_at',
     ]
     list_filter = ['status', 'asset_type', 'branch', 'created_at']
-    search_fields = ['asset_id', 'name', 'serial_number', 'assigned_to_name']
-    readonly_fields = ['asset_id', 'created_at', 'updated_at']
+    search_fields = ['name', 'serial_number']
+    readonly_fields = ['created_at', 'updated_at']
     list_editable = ['status']
     ordering = ['-created_at']
 
 
 @admin.register(DailyWorkReport)
 class DailyWorkReportAdmin(admin.ModelAdmin):
-    list_display = ['id', 'date', 'hours_worked', 'mood', 'status', 'created_at']
-    list_filter = ['status', 'mood', 'date', 'created_at']
+    list_display = ['id', 'day', 'hours_worked', 'mood', 'status', 'created_at']
+    list_filter = ['status', 'mood', 'day', 'created_at']
     search_fields = []
     readonly_fields = ['created_at', 'updated_at']
-    ordering = ['-date', '-created_at']
+    ordering = ['-day', '-created_at']
     list_editable = ['status']
 
 

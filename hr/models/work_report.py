@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from .base import BaseModel
 from hr.utils.validators import validate_employee_id
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class DailyWorkReport(BaseModel):
     """Model for tracking daily work reports from employees"""
@@ -14,6 +15,7 @@ class DailyWorkReport(BaseModel):
         ('Sad', 'Sad'),
         ('Stressed', 'Stressed'),
         ('Tired', 'Tired'),
+        ('Frustrated', 'Frustrated'),
     ]
 
     STATUS_CHOICES = [
@@ -25,11 +27,9 @@ class DailyWorkReport(BaseModel):
 
     # Employee Information (employee_id references main backend Employee)
     employee_id = models.CharField(max_length=50, db_index=True, default='', help_text="Employee ID from main backend")
-    employee_name = models.CharField(max_length=255, db_index=True)
-    employee_email = models.EmailField(max_length=255, db_index=True)
 
     # Report Details
-    date = models.DateField(db_index=True)
+    day = models.DateField(db_index=True)
     hours_worked = models.DecimalField(
         max_digits=4,
         decimal_places=1,
@@ -48,6 +48,16 @@ class DailyWorkReport(BaseModel):
     achievements = models.TextField(blank=True, null=True, help_text="Accomplishments today")
     plan_next_day = models.TextField(blank=True, null=True, help_text="Plan for tomorrow")
 
+    rating = models.DecimalField(
+        max_digits=1,
+        decimal_places=0,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+    )
+    feedback = models.TextField(blank=True, null=True, help_text="Feedback")
+
+
     # Status
     status = models.CharField(
         max_length=20,
@@ -58,18 +68,17 @@ class DailyWorkReport(BaseModel):
 
     class Meta:
         db_table = 'daily_work_reports'
-        ordering = ['-date', '-created_at']
+        ordering = ['-day', '-created_at']
         verbose_name = 'Daily Work Report'
         verbose_name_plural = 'Daily Work Reports'
         indexes = [
-            models.Index(fields=['employee_id', 'date']),
-            models.Index(fields=['employee_email', 'date']),
+            models.Index(fields=['employee_id', 'day']),
             models.Index(fields=['status']),
         ]
-        unique_together = ['employee_id', 'date']
+        unique_together = ['employee_id', 'day']
 
     def __str__(self):
-        return f"{self.employee_name} - {self.date}"
+        return f"{self.employee_id} - {self.day}"
 
     def clean(self):
         """
@@ -81,11 +90,7 @@ class DailyWorkReport(BaseModel):
         # Validate employee_id
         if self.employee_id:
             try:
-                employee_info = validate_employee_id(self.employee_id)
-                # Update cached fields with validated data
-                if employee_info:
-                    self.employee_name = employee_info.get('full_name', self.employee_name)
-                    self.employee_email = employee_info.get('email', self.employee_email)
+                employee_info = validate_employee_id(self.employee_id)                
             except ValidationError as e:
                 errors['employee_id'] = e.message
 
@@ -96,7 +101,7 @@ class DailyWorkReport(BaseModel):
         """
         Override save to ensure validation happens.
         """
-        if not kwargs.pop('skip_validation', False):
-            self.full_clean()
+        # if not kwargs.pop('skip_validation', False):
+        #     self.full_clean()
 
         super().save(*args, **kwargs)

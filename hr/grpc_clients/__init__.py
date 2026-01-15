@@ -5,5 +5,3 @@ Provides clients for communicating with other microservices.
 """
 from .department_client import department_client
 from .auth_client import auth_client
-
-__all__ = ['department_client', 'auth_client']

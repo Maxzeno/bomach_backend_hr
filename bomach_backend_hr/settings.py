@@ -53,6 +53,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "hr.utils.middleware.ResponseFormaterMiddleware",
 ]
 
 ROOT_URLCONF = "bomach_backend_hr.urls"

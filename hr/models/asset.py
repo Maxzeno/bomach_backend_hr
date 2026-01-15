@@ -89,7 +89,6 @@ class Asset(BaseModel):
         verbose_name = 'Asset'
         verbose_name_plural = 'Assets'
         indexes = [
-            models.Index(fields=['asset_id']),
             models.Index(fields=['status']),
             models.Index(fields=['asset_type']),
             models.Index(fields=['branch']),
@@ -97,7 +96,7 @@ class Asset(BaseModel):
         ]
 
     def __str__(self):
-        return f"{self.asset_id} - {self.name}"
+        return f"{self.name}"
 
     def clean(self):
         """
@@ -120,22 +119,5 @@ class Asset(BaseModel):
         # Validate unless explicitly skipped
         if not kwargs.pop('skip_validation', False):
             self.full_clean()
-
-        # Auto-generate asset_id if not provided
-        # Using select_for_update to prevent race conditions
-        if not self.asset_id:
-            from django.db import transaction
-            with transaction.atomic():
-                last_asset = Asset.objects.select_for_update().order_by('-id').first()
-                if last_asset and last_asset.asset_id:
-                    try:
-                        # Assuming format AST-XXX
-                        last_number = int(last_asset.asset_id.split('-')[1])
-                        new_number = last_number + 1
-                    except (IndexError, ValueError):
-                        new_number = 1
-                else:
-                    new_number = 1
-                self.asset_id = f"AST-{new_number:03d}"
 
         super().save(*args, **kwargs)

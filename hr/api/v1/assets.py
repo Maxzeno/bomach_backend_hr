@@ -6,7 +6,7 @@ from django.db.models import Q
 from hr.models.asset import Asset
 from hr.api.schemas.asset import AssetCreate, AssetUpdate, AssetOut
 
-router = Router()
+router = Router(tags=['Assets'])
 
 @router.get("/", response=List[AssetOut])
 @paginate(LimitOffsetPagination, page_size=10)

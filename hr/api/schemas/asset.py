@@ -36,7 +36,6 @@ class AssetUpdate(Schema):
     manufacturer: Optional[str] = None
 
 class AssetOut(Schema):
-    asset_id: str
     name: str
     asset_type: str
     branch: str

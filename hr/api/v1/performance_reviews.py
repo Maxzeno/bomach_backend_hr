@@ -14,12 +14,12 @@ from ninja.pagination import paginate, LimitOffsetPagination
 
 router = Router(tags=['Performance Reviews'])
 
-@router.post("/", response={201: PerformanceReviewResponseSchema})
+@router.post("/", response={201: PerformanceReviewResponseSchema}, auth=None)
 def create_performance_review(request, payload: PerformanceReviewCreateSchema):
     review = PerformanceReview.objects.create(**payload.model_dump())
     return 201, review
 
-@router.get("/", response=List[PerformanceReviewResponseSchema])
+@router.get("/", response=List[PerformanceReviewResponseSchema], auth=None)
 @paginate(LimitOffsetPagination, page_size=10)
 def list_performance_reviews(request, filters: PerformanceReviewFilterSchema = Query(...)):
     reviews = PerformanceReview.objects.all()

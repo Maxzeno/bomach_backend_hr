@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
+from hr.utils.validators import validate_employee_id
 
 
 class DisciplinaryCase(models.Model):
@@ -133,7 +134,14 @@ class DisciplinaryCase(models.Model):
     def clean(self):
         """Validate the model data"""
         from django.core.exceptions import ValidationError
-        
+
+        # Validate employee_id
+        if self.employee_id:
+            try:
+                validate_employee_id(self.employee_id)
+            except ValidationError as e:
+                raise ValidationError({'employee_id': e.message})
+
         # Ensure date_of_violation is not in the future
         if self.date_of_violation and self.date_of_violation > timezone.now().date():
             raise ValidationError({

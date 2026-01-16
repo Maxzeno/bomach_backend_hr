@@ -109,7 +109,7 @@ class Payroll(BaseModel):
             try:
                 employee_info = validate_employee_id(self.employee_id)
             except ValidationError as e:
-                ValidationError(e.message)
+                raise ValidationError({'employee_id': e.message})
 
     def save(self, *args, **kwargs):
         """Override save to validate and auto-calculate net salary"""

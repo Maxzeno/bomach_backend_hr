@@ -1,174 +1,127 @@
 """
-gRPC Client for Auth/User Service
+Auth gRPC Client
 
-Handles communication with the Auth/User microservice.
+This module provides a client for communicating with the Auth gRPC server
+in the main backend to validate employees, users, and branches.
 """
-import grpc
-import logging
-from typing import Optional, Dict, List
-from django.core.cache import cache
 
-from .generated import auth_service_pb2, auth_service_pb2_grpc
-from .config import (
-    AUTH_SERVICE_ADDRESS,
-    GRPC_TIMEOUT,
-    GRPC_MAX_RETRIES,
-    GRPC_RETRY_DELAY,
-    ENABLE_GRPC_VALIDATION
-)
+import logging
+import grpc
+from typing import Dict, Optional
+from django.conf import settings
+
+from hr.grpc_compiled import auth_service_pb2
+from hr.grpc_compiled import auth_service_pb2_grpc
 
 logger = logging.getLogger(__name__)
 
 
-class AuthServiceClient:
-    """Client for interacting with Auth/User gRPC service"""
+class AuthClient:
+    """
+    Client for communicating with the Auth gRPC server.
 
-    def __init__(self):
-        self.address = AUTH_SERVICE_ADDRESS
-        self.timeout = GRPC_TIMEOUT
+    This client provides methods for:
+    - Validating employee IDs
+    - Getting employee details
+    - Validating user IDs
+    - Getting user details
+    - Validating branch IDs
+    - Getting branch details
+    """
 
-    def _get_channel(self):
-        """Create a gRPC channel"""
-        return grpc.insecure_channel(self.address)
-
-    def _get_stub(self, channel):
-        """Get the service stub"""
-        return auth_service_pb2_grpc.AuthServiceStub(channel)
-
-    def validate_user(self, user_id: str) -> Dict:
+    def __init__(
+        self,
+        host: Optional[str] = None,
+        port: Optional[str] = None,
+        timeout: int = 5
+    ):
         """
-        Validate if a user exists.
+        Initialize the auth gRPC client.
 
         Args:
-            user_id: The user ID to validate
-
-        Returns:
-            Dict with 'exists', 'message', and 'user' keys
-
-        Raises:
-            grpc.RpcError: If the gRPC call fails
+            host: gRPC server host (default from settings or 'localhost')
+            port: gRPC server port (default from settings or '50052')
+            timeout: Request timeout in seconds
         """
-        if not ENABLE_GRPC_VALIDATION:
-            logger.warning("gRPC validation is disabled. Skipping user validation.")
-            return {
-                'exists': True,
-                'message': 'Validation disabled',
-                'user': None
-            }
+        self.host = host or getattr(settings, 'GRPC_AUTH_SERVICE_HOST', 'localhost')
+        self.port = port or getattr(settings, 'GRPC_AUTH_SERVICE_PORT', '50052')
+        self.timeout = timeout
+        self._channel = None
+        self._stub = None
 
-        # Check cache first
-        cache_key = f'user_valid_{user_id}'
-        cached_result = cache.get(cache_key)
-        if cached_result is not None:
-            return cached_result
+    @property
+    def channel(self):
+        """Lazy-loaded gRPC channel."""
+        if self._channel is None:
+            self._channel = grpc.insecure_channel(f'{self.host}:{self.port}')
+        return self._channel
 
-        try:
-            with self._get_channel() as channel:
-                stub = self._get_stub(channel)
-                request = auth_service_pb2.ValidateUserRequest(user_id=user_id)
-                response = stub.ValidateUser(request, timeout=self.timeout)
+    @property
+    def stub(self):
+        """Lazy-loaded gRPC stub."""
+        if self._stub is None:
+            self._stub = auth_service_pb2_grpc.AuthServiceStub(self.channel)
+        return self._stub
 
-                result = {
-                    'exists': response.exists,
-                    'message': response.message,
-                    'user': self._parse_user(response.user) if response.exists else None
-                }
+    def close(self):
+        """Close the gRPC channel."""
+        if self._channel:
+            self._channel.close()
+            self._channel = None
+            self._stub = None
 
-                # Cache valid results for 5 minutes
-                if response.exists:
-                    cache.set(cache_key, result, timeout=300)
+    def __enter__(self):
+        return self
 
-                return result
-
-        except grpc.RpcError as e:
-            logger.error(f"gRPC error validating user {user_id}: {e.code()} - {e.details()}")
-            raise
-
-    def get_user(self, user_id: str) -> Optional[Dict]:
-        """
-        Get user details by ID.
-
-        Args:
-            user_id: The user ID
-
-        Returns:
-            User dict or None if not found
-
-        Raises:
-            grpc.RpcError: If the gRPC call fails
-        """
-        # Check cache first
-        cache_key = f'user_{user_id}'
-        cached_result = cache.get(cache_key)
-        if cached_result is not None:
-            return cached_result
-
-        try:
-            with self._get_channel() as channel:
-                stub = self._get_stub(channel)
-                request = auth_service_pb2.GetUserRequest(user_id=user_id)
-                response = stub.GetUser(request, timeout=self.timeout)
-
-                result = self._parse_user(response)
-
-                # Cache for 5 minutes
-                cache.set(cache_key, result, timeout=300)
-
-                return result
-
-        except grpc.RpcError as e:
-            if e.code() == grpc.StatusCode.NOT_FOUND:
-                logger.warning(f"User {user_id} not found")
-                return None
-            logger.error(f"gRPC error getting user {user_id}: {e.code()} - {e.details()}")
-            raise
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     def validate_employee(self, employee_id: str) -> Dict:
         """
-        Validate if an employee exists.
+        Validate that an employee ID exists and is active.
 
         Args:
             employee_id: The employee ID to validate
 
         Returns:
-            Dict with 'exists', 'message', and 'employee' keys
+            dict: {
+                'exists': bool,
+                'employee': dict or None,
+                'message': str
+            }
 
         Raises:
             grpc.RpcError: If the gRPC call fails
         """
-        if not ENABLE_GRPC_VALIDATION:
-            logger.warning("gRPC validation is disabled. Skipping employee validation.")
-            return {
-                'exists': True,
-                'message': 'Validation disabled',
-                'employee': None
-            }
-
-        # Check cache first
-        cache_key = f'employee_valid_{employee_id}'
-        cached_result = cache.get(cache_key)
-        if cached_result is not None:
-            return cached_result
-
         try:
-            with self._get_channel() as channel:
-                stub = self._get_stub(channel)
-                request = auth_service_pb2.ValidateEmployeeRequest(
-                    employee_id=employee_id
-                )
-                response = stub.ValidateEmployee(request, timeout=self.timeout)
+            request = auth_service_pb2.ValidateEmployeeRequest(
+                employee_id=employee_id
+            )
 
-                result = {
-                    'exists': response.exists,
-                    'message': response.message,
-                    'employee': self._parse_employee(response.employee) if response.exists else None
+            response = self.stub.ValidateEmployee(request, timeout=self.timeout)
+
+            employee_data = None
+            if response.employee and response.exists:
+                employee_data = {
+                    'id': response.employee.id,
+                    'employee_id': response.employee.employee_id,
+                    'email': response.employee.email,
+                    'full_name': response.employee.full_name,
+                    'phone': response.employee.phone,
+                    'department_id': response.employee.department_id,
+                    'position': response.employee.position,
+                    'is_active': response.employee.is_active,
+                    'created_at': response.employee.created_at,
+                    'updated_at': response.employee.updated_at,
                 }
 
-                # Cache valid results for 5 minutes
-                if response.exists:
-                    cache.set(cache_key, result, timeout=300)
+            logger.info(f"Employee validation result for {employee_id}: {response.exists}")
 
-                return result
+            return {
+                'exists': response.exists,
+                'employee': employee_data,
+                'message': response.message
+            }
 
         except grpc.RpcError as e:
             logger.error(f"gRPC error validating employee {employee_id}: {e.code()} - {e.details()}")
@@ -176,97 +129,189 @@ class AuthServiceClient:
 
     def get_employee(self, employee_id: str) -> Optional[Dict]:
         """
-        Get employee details by ID.
+        Get employee details by employee ID.
 
         Args:
-            employee_id: The employee ID
+            employee_id: The employee ID to fetch
 
         Returns:
-            Employee dict or None if not found
-
-        Raises:
-            grpc.RpcError: If the gRPC call fails
+            dict: Employee details or None if not found
         """
-        # Check cache first
-        cache_key = f'employee_{employee_id}'
-        cached_result = cache.get(cache_key)
-        if cached_result is not None:
-            return cached_result
-
         try:
-            with self._get_channel() as channel:
-                stub = self._get_stub(channel)
-                request = auth_service_pb2.GetEmployeeRequest(
-                    employee_id=employee_id
-                )
-                response = stub.GetEmployee(request, timeout=self.timeout)
+            request = auth_service_pb2.GetEmployeeRequest(employee_id=employee_id)
+            response = self.stub.GetEmployee(request, timeout=self.timeout)
 
-                result = self._parse_employee(response)
-
-                # Cache for 5 minutes
-                cache.set(cache_key, result, timeout=300)
-
-                return result
+            return {
+                'id': response.id,
+                'employee_id': response.employee_id,
+                'email': response.email,
+                'full_name': response.full_name,
+                'phone': response.phone,
+                'department_id': response.department_id,
+                'position': response.position,
+                'is_active': response.is_active,
+                'created_at': response.created_at,
+                'updated_at': response.updated_at,
+            }
 
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.NOT_FOUND:
-                logger.warning(f"Employee {employee_id} not found")
                 return None
             logger.error(f"gRPC error getting employee {employee_id}: {e.code()} - {e.details()}")
             raise
 
-    def get_users(self, user_ids: List[str]) -> List[Dict]:
+    def validate_user(self, user_id: str) -> Dict:
         """
-        Get multiple users by IDs.
+        Validate that a user ID exists and is active.
 
         Args:
-            user_ids: List of user IDs
+            user_id: The user ID to validate
 
         Returns:
-            List of user dicts
+            dict: {
+                'exists': bool,
+                'user': dict or None,
+                'message': str
+            }
 
         Raises:
             grpc.RpcError: If the gRPC call fails
         """
         try:
-            with self._get_channel() as channel:
-                stub = self._get_stub(channel)
-                request = auth_service_pb2.GetUsersRequest(user_ids=user_ids)
-                response = stub.GetUsers(request, timeout=self.timeout)
+            request = auth_service_pb2.ValidateUserRequest(user_id=user_id)
+            response = self.stub.ValidateUser(request, timeout=self.timeout)
 
-                return [self._parse_user(user) for user in response.users]
+            user_data = None
+            if response.user and response.exists:
+                user_data = {
+                    'id': response.user.id,
+                    'email': response.user.email,
+                    'full_name': response.user.full_name,
+                    'username': response.user.username,
+                    'is_active': response.user.is_active,
+                    'created_at': response.user.created_at,
+                    'updated_at': response.user.updated_at,
+                }
+
+            logger.info(f"User validation result for {user_id}: {response.exists}")
+
+            return {
+                'exists': response.exists,
+                'user': user_data,
+                'message': response.message
+            }
 
         except grpc.RpcError as e:
-            logger.error(f"gRPC error getting users: {e.code()} - {e.details()}")
+            logger.error(f"gRPC error validating user {user_id}: {e.code()} - {e.details()}")
             raise
 
-    def _parse_user(self, user_msg) -> Dict:
-        """Parse user protobuf message to dict"""
-        return {
-            'id': user_msg.id,
-            'email': user_msg.email,
-            'full_name': user_msg.full_name,
-            'username': user_msg.username,
-            'is_active': user_msg.is_active,
-            'created_at': user_msg.created_at,
-            'updated_at': user_msg.updated_at,
-        }
+    def get_user(self, user_id: str) -> Optional[Dict]:
+        """
+        Get user details by user ID.
 
-    def _parse_employee(self, employee_msg) -> Dict:
-        """Parse employee protobuf message to dict"""
-        return {
-            'id': employee_msg.id,
-            'employee_id': employee_msg.employee_id,
-            'email': employee_msg.email,
-            'full_name': employee_msg.full_name,
-            'phone': employee_msg.phone,
-            'department_id': employee_msg.department_id,
-            'position': employee_msg.position,
-            'is_active': employee_msg.is_active,
-            'created_at': employee_msg.created_at,
-            'updated_at': employee_msg.updated_at,
-        }
+        Args:
+            user_id: The user ID to fetch
 
+        Returns:
+            dict: User details or None if not found
+        """
+        try:
+            request = auth_service_pb2.GetUserRequest(user_id=user_id)
+            response = self.stub.GetUser(request, timeout=self.timeout)
 
-# Singleton instance
-auth_client = AuthServiceClient()
+            return {
+                'id': response.id,
+                'email': response.email,
+                'full_name': response.full_name,
+                'username': response.username,
+                'is_active': response.is_active,
+                'created_at': response.created_at,
+                'updated_at': response.updated_at,
+            }
+
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.NOT_FOUND:
+                return None
+            logger.error(f"gRPC error getting user {user_id}: {e.code()} - {e.details()}")
+            raise
+
+    def validate_branch(self, branch_id: str) -> Dict:
+        """
+        Validate that a branch ID exists and is active.
+
+        Args:
+            branch_id: The branch ID to validate
+
+        Returns:
+            dict: {
+                'exists': bool,
+                'branch': dict or None,
+                'message': str
+            }
+
+        Raises:
+            grpc.RpcError: If the gRPC call fails
+        """
+        try:
+            request = auth_service_pb2.ValidateBranchRequest(branch_id=branch_id)
+            response = self.stub.ValidateBranch(request, timeout=self.timeout)
+
+            branch_data = None
+            if response.branch and response.exists:
+                branch_data = {
+                    'id': response.branch.id,
+                    'branch_id': response.branch.branch_id,
+                    'branch_name': response.branch.branch_name,
+                    'country': response.branch.country,
+                    'state': response.branch.state,
+                    'office_address': response.branch.office_address,
+                    'operational_status': response.branch.operational_status,
+                    'is_active': response.branch.is_active,
+                    'created_at': response.branch.created_at,
+                    'updated_at': response.branch.updated_at,
+                }
+
+            logger.info(f"Branch validation result for {branch_id}: {response.exists}")
+
+            return {
+                'exists': response.exists,
+                'branch': branch_data,
+                'message': response.message
+            }
+
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error validating branch {branch_id}: {e.code()} - {e.details()}")
+            raise
+
+    def get_branch(self, branch_id: str) -> Optional[Dict]:
+        """
+        Get branch details by branch ID.
+
+        Args:
+            branch_id: The branch ID to fetch
+
+        Returns:
+            dict: Branch details or None if not found
+        """
+        try:
+            request = auth_service_pb2.GetBranchRequest(branch_id=branch_id)
+            response = self.stub.GetBranch(request, timeout=self.timeout)
+
+            return {
+                'id': response.id,
+                'branch_id': response.branch_id,
+                'branch_name': response.branch_name,
+                'country': response.country,
+                'state': response.state,
+                'office_address': response.office_address,
+                'operational_status': response.operational_status,
+                'is_active': response.is_active,
+                'created_at': response.created_at,
+                'updated_at': response.updated_at,
+            }
+
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.NOT_FOUND:
+                return None
+            logger.error(f"gRPC error getting branch {branch_id}: {e.code()} - {e.details()}")
+            raise

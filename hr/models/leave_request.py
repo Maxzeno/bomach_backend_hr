@@ -93,7 +93,7 @@ class LeaveRequest(BaseModel):
         # Validate date logic
         if self.start_date and self.end_date:
             if self.end_date < self.start_date:
-                raise ValidationError(e.message)
+                raise ValidationError({'end_date': 'End date cannot be before start date'})
 
 
     def save(self, *args, **kwargs):
@@ -101,7 +101,7 @@ class LeaveRequest(BaseModel):
         Override save to ensure validation happens.
         """
         # Skip validation if explicitly requested (for data migrations, etc.)
-        # if not kwargs.pop('skip_validation', False):
-        #     self.full_clean()
+        if not kwargs.pop('skip_validation', False):
+            self.full_clean()
 
         super().save(*args, **kwargs)

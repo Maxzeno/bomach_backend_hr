@@ -214,3 +214,53 @@ def validate_user_id(user_id: str) -> Dict:
     except Exception as e:
         logger.error(f"Unexpected error validating user {user_id}: {str(e)}")
         raise ValidationError(f"Error validating user ID: {str(e)}")
+
+
+def validate_branch_id(branch_id: str) -> Dict:
+    """
+    Validate that a branch ID exists in the auth microservice using gRPC.
+
+    Args:
+        branch_id: The branch ID to validate
+
+    Returns:
+        dict: Branch information if valid
+
+    Raises:
+        ValidationError: If branch_id is invalid or not found
+    """
+    if not branch_id:
+        raise ValidationError("Branch ID is required")
+
+    try:
+        from hr.grpc_clients import auth_client
+
+        result = auth_client.validate_branch(branch_id)
+
+        if not result['exists']:
+            raise ValidationError(
+                f"Branch with ID '{branch_id}' does not exist in the auth service"
+            )
+
+        # Check if branch is active
+        if result['branch'] and not result['branch'].get('is_active', True):
+            raise ValidationError(
+                f"Branch with ID '{branch_id}' is not active"
+            )
+
+        return result['branch']
+
+    except grpc.RpcError as e:
+        if e.code() == grpc.StatusCode.UNAVAILABLE:
+            logger.error(f"Auth service is unavailable: {e.details()}")
+            raise ValidationError(
+                "Unable to validate branch ID - Auth service is unavailable"
+            )
+        else:
+            logger.error(f"gRPC error validating branch: {e.code()} - {e.details()}")
+            raise ValidationError(
+                f"Error validating branch ID: {e.details()}"
+            )
+    except Exception as e:
+        logger.error(f"Unexpected error validating branch {branch_id}: {str(e)}")
+        raise ValidationError(f"Error validating branch ID: {str(e)}")

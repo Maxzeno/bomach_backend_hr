@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from .base import BaseModel
-from hr.utils.validators import validate_employee_id
+from hr.utils.validators import validate_employee_id, validate_department_id
 
 class Asset(BaseModel):
     """Model for company assets"""
@@ -111,6 +111,13 @@ class Asset(BaseModel):
                 employee_info = validate_employee_id(self.assigned_to_id)
             except ValidationError as e:
                 errors['assigned_to_id'] = e.message
+
+        # Validate department_id (optional field)
+        if self.department_id:
+            try:
+                validate_department_id(self.department_id)
+            except ValidationError as e:
+                errors['department_id'] = e.message
 
         if errors:
             raise ValidationError(errors)

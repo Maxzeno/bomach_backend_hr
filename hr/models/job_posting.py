@@ -1,5 +1,7 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from .base import BaseModel
+from hr.utils.validators import validate_department_id, validate_branch_id
 
 
 class JobPosting(BaseModel):
@@ -56,6 +58,34 @@ class JobPosting(BaseModel):
 
     def __str__(self):
         return f"{self.job_title} - {self.department_id}"
+
+    def clean(self):
+        """Validate cross-service references before saving."""
+        super().clean()
+        errors = {}
+
+        # Validate department_id (optional field)
+        if self.department_id:
+            try:
+                validate_department_id(self.department_id)
+            except ValidationError as e:
+                errors['department_id'] = e.message
+
+        # Validate branch_id (required field)
+        if self.branch_id:
+            try:
+                validate_branch_id(self.branch_id)
+            except ValidationError as e:
+                errors['branch_id'] = e.message
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """Override save to ensure validation happens."""
+        if not kwargs.pop('skip_validation', False):
+            self.full_clean()
+        super().save(*args, **kwargs)
 
     def increment_applicants(self):
         """Increment the applicants count"""

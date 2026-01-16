@@ -1,7 +1,9 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 from decimal import Decimal
 from .base import BaseModel
+from hr.utils.validators import validate_department_id
 
 
 class Associate(BaseModel):
@@ -138,8 +140,27 @@ class Associate(BaseModel):
     def __str__(self):
         return f"{self.associate_id} - {self.full_name} ({self.company_name})"
 
+    def clean(self):
+        """Validate cross-service references before saving."""
+        super().clean()
+        errors = {}
+
+        # Validate department_id (optional field)
+        if self.department_id:
+            try:
+                validate_department_id(self.department_id)
+            except ValidationError as e:
+                errors['department_id'] = e.message
+
+        if errors:
+            raise ValidationError(errors)
+
     def save(self, *args, **kwargs):
         """Override save to auto-generate associate_id"""
+        # Validate unless explicitly skipped
+        if not kwargs.pop('skip_validation', False):
+            self.full_clean()
+
         # Using select_for_update to prevent race conditions
         if not self.associate_id:
             from django.db import transaction

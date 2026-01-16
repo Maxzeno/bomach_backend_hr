@@ -60,6 +60,16 @@ class AuthServiceStub(object):
                 request_serializer=auth__service__pb2.GetEmployeeRequest.SerializeToString,
                 response_deserializer=auth__service__pb2.Employee.FromString,
                 _registered_method=True)
+        self.ValidateBranch = channel.unary_unary(
+                '/auth.AuthService/ValidateBranch',
+                request_serializer=auth__service__pb2.ValidateBranchRequest.SerializeToString,
+                response_deserializer=auth__service__pb2.ValidateBranchResponse.FromString,
+                _registered_method=True)
+        self.GetBranch = channel.unary_unary(
+                '/auth.AuthService/GetBranch',
+                request_serializer=auth__service__pb2.GetBranchRequest.SerializeToString,
+                response_deserializer=auth__service__pb2.Branch.FromString,
+                _registered_method=True)
 
 
 class AuthServiceServicer(object):
@@ -101,6 +111,20 @@ class AuthServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ValidateBranch(self, request, context):
+        """Validate branch ID
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetBranch(self, request, context):
+        """Get branch details
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AuthServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -128,6 +152,16 @@ def add_AuthServiceServicer_to_server(servicer, server):
                     servicer.GetEmployee,
                     request_deserializer=auth__service__pb2.GetEmployeeRequest.FromString,
                     response_serializer=auth__service__pb2.Employee.SerializeToString,
+            ),
+            'ValidateBranch': grpc.unary_unary_rpc_method_handler(
+                    servicer.ValidateBranch,
+                    request_deserializer=auth__service__pb2.ValidateBranchRequest.FromString,
+                    response_serializer=auth__service__pb2.ValidateBranchResponse.SerializeToString,
+            ),
+            'GetBranch': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetBranch,
+                    request_deserializer=auth__service__pb2.GetBranchRequest.FromString,
+                    response_serializer=auth__service__pb2.Branch.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -266,6 +300,60 @@ class AuthService(object):
             '/auth.AuthService/GetEmployee',
             auth__service__pb2.GetEmployeeRequest.SerializeToString,
             auth__service__pb2.Employee.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ValidateBranch(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/auth.AuthService/ValidateBranch',
+            auth__service__pb2.ValidateBranchRequest.SerializeToString,
+            auth__service__pb2.ValidateBranchResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetBranch(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/auth.AuthService/GetBranch',
+            auth__service__pb2.GetBranchRequest.SerializeToString,
+            auth__service__pb2.Branch.FromString,
             options,
             channel_credentials,
             insecure,

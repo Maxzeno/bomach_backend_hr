@@ -186,4 +186,4 @@ def delete_applicant(request, applicant_id: int):
     # Decrement job posting applicants count
     job_posting.decrement_applicants()
 
-    return 200, {'message': f'Applicant "{applicant_name}" deleted successfully'}
+    return 200, {'detail': f'Applicant "{applicant_name}" deleted successfully'}

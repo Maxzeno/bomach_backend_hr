@@ -96,4 +96,4 @@ def delete_work_report(request, report_id: int):
     report = get_object_or_404(DailyWorkReport, id=report_id)
     report_date = report.day
     report.delete()
-    return 200, {'message': f'Work report on {report_date} deleted successfully'}
+    return 200, {'detail': f'Work report on {report_date} deleted successfully'}

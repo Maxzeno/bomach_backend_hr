@@ -125,7 +125,7 @@ def delete_job_posting(request, job_posting_id: int):
     """
     job_posting = get_object_or_404(JobPosting, id=job_posting_id)
     job_posting.delete()
-    return 200, {'message': f'Job posting "{job_posting.job_title}" deleted successfully'}
+    return 200, {'detail': f'Job posting "{job_posting.job_title}" deleted successfully'}
 
 
 @router.get('/stats/summary', response=dict)

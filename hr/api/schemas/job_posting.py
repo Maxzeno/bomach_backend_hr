@@ -78,4 +78,4 @@ class JobPostingListItemSchema(BaseModel):
 
 class MessageSchema(BaseModel):
     """Generic message response schema"""
-    message: str
+    detail: str

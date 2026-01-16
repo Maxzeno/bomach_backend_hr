@@ -104,7 +104,6 @@ class Payroll(BaseModel):
     def clean(self):
         super().clean()
 
-        # Validate employee_id
         if self.employee_id:
             try:
                 employee_info = validate_employee_id(self.employee_id)

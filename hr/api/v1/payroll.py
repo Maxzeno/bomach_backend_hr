@@ -2,6 +2,7 @@ from typing import List, Optional
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from ninja import Router, Query
+from hr.api.schemas.job_posting import MessageSchema
 from hr.models import Payroll
 from hr.api.schemas import (
     PayrollCreateSchema,
@@ -11,16 +12,19 @@ from hr.api.schemas import (
     PayrollFilterSchema,
 )
 from ninja.pagination import paginate, LimitOffsetPagination
+from django.core.exceptions import ValidationError
 
 router = Router(tags=['Payroll'])
 
 
-@router.post("/", response={201: PayrollResponseSchema})
+@router.post("/", response={201: PayrollResponseSchema, 400: MessageSchema}, auth=None)
 def create_payroll(request, payload: PayrollCreateSchema):
     """Create a new payroll record"""
-    payroll = Payroll.objects.create(**payload.model_dump())
-    return 201, payroll
-
+    try:
+        payroll = Payroll.objects.create(**payload.model_dump())
+        return 201, payroll
+    except ValidationError as e:
+        return 400, {"detail": e.messages[0]}
 
 @router.get("/", response=List[PayrollListSchema])
 @paginate(LimitOffsetPagination, page_size=10)

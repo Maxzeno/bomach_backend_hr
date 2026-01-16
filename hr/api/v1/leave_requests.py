@@ -135,7 +135,7 @@ def delete_leave_request(request, leave_request_id: int):
     """
     leave_request = get_object_or_404(LeaveRequest, id=leave_request_id)
     leave_request.delete()
-    return 200, {'message': f'Leave request deleted successfully'}
+    return 200, {'detail': f'Leave request deleted successfully'}
 
 
 @router.get('/stats/summary', response=dict)

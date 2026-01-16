@@ -9,6 +9,8 @@ class PayrollCreateSchema(Schema):
     employee_id: str
     payroll_period: str
     gross_salary: Decimal = Field(..., gt=0, decimal_places=2)
+    net_salary: Decimal = Field(..., gt=0, decimal_places=2)
+    
     allowances: Optional[Dict[str, float]] = Field(default_factory=dict)
     deductions: Optional[Dict[str, float]] = Field(default_factory=dict)
     disbursement_date: date

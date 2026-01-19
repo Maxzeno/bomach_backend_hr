@@ -61,6 +61,10 @@ def validate_department_id(department_id: str) -> Dict:
             raise ValidationError(
                 f"{e.details()}"
             )
+        
+    except ValidationError as e:
+        raise ValidationError(e.messages[0])
+
     except Exception as e:
         logger.error(f"Unexpected error validating department {department_id}: {str(e)}")
         raise ValidationError(f"{str(e)}")
@@ -111,6 +115,10 @@ def validate_sub_department_id(sub_department_id: str) -> Dict:
             raise ValidationError(
                 f"{e.details()}"
             )
+        
+    except ValidationError as e:
+        raise ValidationError(e.messages[0])
+
     except Exception as e:
         logger.error(f"Unexpected error validating sub-department {sub_department_id}: {str(e)}")
         raise ValidationError(f"{str(e)}")
@@ -161,6 +169,10 @@ def validate_employee_id(employee_id: str) -> Dict:
             raise ValidationError(
                 f"{e.details()}"
             )
+        
+    except ValidationError as e:
+        raise ValidationError(e.messages[0])
+
     except Exception as e:
         logger.error(f"Unexpected error validating employee {employee_id}: {str(e)}")
         raise ValidationError(f"{str(e)}")
@@ -211,6 +223,10 @@ def validate_user_id(user_id: str) -> Dict:
             raise ValidationError(
                 f"{e.details()}"
             )
+        
+    except ValidationError as e:
+        raise ValidationError(e.messages[0])
+
     except Exception as e:
         logger.error(f"Unexpected error validating user {user_id}: {str(e)}")
         raise ValidationError(f"{str(e)}")
@@ -261,6 +277,11 @@ def validate_branch_id(branch_id: str) -> Dict:
             raise ValidationError(
                 f"{e.details()}"
             )
+        
+    except ValidationError as e:
+        logger.error(f"Unexpected error validating branch {branch_id}: {str(e)}")
+        raise ValidationError(e.messages[0])
+
     except Exception as e:
         logger.error(f"Unexpected error validating branch {branch_id}: {str(e)}")
         raise ValidationError(f"{str(e)}")

@@ -4,7 +4,6 @@ from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from hr.models.award import Award
-from hr.models.associate import Associate
 from hr.api.schemas.award import AwardSchema, AwardCreateSchema, AwardUpdateSchema
 from hr.api.schemas import MessageSchema
 

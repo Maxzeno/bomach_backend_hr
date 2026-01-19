@@ -10,8 +10,8 @@ import grpc
 from typing import Dict, Optional
 from django.conf import settings
 
-from hr.grpc_compiled import auth_service_pb2
-from hr.grpc_compiled import auth_service_pb2_grpc
+from . import auth_service_pb2
+from . import auth_service_pb2_grpc
 
 logger = logging.getLogger(__name__)
 

@@ -9,7 +9,7 @@ class JobPostingCreateSchema(BaseModel):
     department_id: Optional[str] = Field(None, description="Department ID from department microservice")
     branch_id: str = Field(..., min_length=1, max_length=255)
     job_type: str = Field(..., description="Job type: Full-Time, Part-Time, Contract, Internship, Temporary")
-    status: Optional[str] = Field(default="Draft", description="Status: Draft, Pending, Active, Closed, Cancelled")
+    status: Optional[str] = Field(default="draft", description="Status: draft, pending, active, closed, cancelled")
     description: Optional[str] = None
     requirements: Optional[str] = None
     responsibilities: Optional[str] = None
@@ -35,7 +35,7 @@ class JobPostingUpdateSchema(BaseModel):
 
 class JobPostingStatusUpdateSchema(BaseModel):
     """Schema for updating only the status of a job posting"""
-    status: str = Field(..., description="Status: Draft, Pending, Active, Closed, Cancelled")
+    status: str = Field(..., description="Status: draft, pending, active, closed, cancelled")
 
 
 class JobPostingResponseSchema(BaseModel):

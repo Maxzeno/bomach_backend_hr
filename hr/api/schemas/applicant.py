@@ -12,7 +12,7 @@ class ApplicantCreateSchema(BaseModel):
     email: str
     phone: str = Field(..., min_length=1, max_length=20)
     job_posting_id: int = Field(..., description="ID of the job posting")
-    status: Optional[str] = Field(default="New", description="Status: New, In Review, Shortlisted, Hired, Rejected")
+    status: Optional[str] = Field(default="new", description="Status: new, in_review, shortlisted, hired, rejected")
     cover_letter: Optional[str] = None
     resume: Optional[str] = None
     linkedin_url: Optional[str] = None
@@ -39,12 +39,12 @@ class ApplicantUpdateSchema(BaseModel):
 
 class ApplicantStageUpdateSchema(BaseModel):
     """Schema for updating applicant stage"""
-    stage: str = Field(..., description="Stage: Applied, Screening, Interview, Offered, Rejected")
+    stage: str = Field(..., description="Stage: applied, screening, interview, offered, rejected")
 
 
 class ApplicantStatusUpdateSchema(BaseModel):
     """Schema for updating applicant status"""
-    status: str = Field(..., description="Status: New, In Review, Shortlisted, Hired, Rejected")
+    status: str = Field(..., description="Status: new, in_review, shortlisted, hired, rejected")
 
 
 class ApplicantRatingUpdateSchema(BaseModel):

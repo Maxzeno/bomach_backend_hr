@@ -4,6 +4,7 @@ from ninja import Router
 from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 
 from hr.models import DailyWorkReport
 from hr.api.schemas import (
@@ -63,37 +64,46 @@ def get_work_report(request, report_id: int):
     return report
 
 
-@router.post('/', response={201: WorkReportOut})
+@router.post('/', response={201: WorkReportOut, 400: MessageSchema})
 def create_work_report(request, payload: WorkReportCreate):
     """
     Create a new daily work report.
     """
-    data = payload.model_dump()
-    report = DailyWorkReport.objects.create(**data)
-    return 201, report
+    try:
+        data = payload.model_dump()
+        report = DailyWorkReport.objects.create(**data)
+        return 201, report
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.put('/{report_id}', response=WorkReportOut)
+@router.put('/{report_id}', response={200: WorkReportOut, 400: MessageSchema})
 def update_work_report(request, report_id: int, payload: WorkReportUpdate):
     """
     Update a work report (full update).
     """
-    report = get_object_or_404(DailyWorkReport, id=report_id)
-    update_data = payload.model_dump(exclude_unset=True)
+    try:
+        report = get_object_or_404(DailyWorkReport, id=report_id)
+        update_data = payload.model_dump(exclude_unset=True)
 
-    for attr, value in update_data.items():
-        setattr(report, attr, value)
+        for attr, value in update_data.items():
+            setattr(report, attr, value)
 
-    report.save()
-    return report
+        report.save()
+        return 200, report
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.delete('/{report_id}', response={200: MessageSchema, 204: None})
+@router.delete('/{report_id}', response={200: MessageSchema, 204: None, 400: MessageSchema})
 def delete_work_report(request, report_id: int):
     """
     Delete a work report.
     """
-    report = get_object_or_404(DailyWorkReport, id=report_id)
-    report_date = report.day
-    report.delete()
-    return 200, {'detail': f'Work report on {report_date} deleted successfully'}
+    try:
+        report = get_object_or_404(DailyWorkReport, id=report_id)
+        report_date = report.day
+        report.delete()
+        return 200, {'detail': f'Work report on {report_date} deleted successfully'}
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}

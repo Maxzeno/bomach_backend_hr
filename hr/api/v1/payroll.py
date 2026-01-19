@@ -66,35 +66,44 @@ def get_payroll(request, payroll_id: int):
     return payroll
 
 
-@router.put("/{payroll_id}", response=PayrollResponseSchema)
+@router.put("/{payroll_id}", response={200: PayrollResponseSchema, 400: MessageSchema})
 def update_payroll(request, payroll_id: int, payload: PayrollUpdateSchema):
     """Update a payroll record"""
-    payroll = get_object_or_404(Payroll, id=payroll_id)
+    try:
+        payroll = get_object_or_404(Payroll, id=payroll_id)
 
-    for attr, value in payload.model_dump(exclude_unset=True).items():
-        setattr(payroll, attr, value)
+        for attr, value in payload.model_dump(exclude_unset=True).items():
+            setattr(payroll, attr, value)
 
-    payroll.save()
-    return payroll
+        payroll.save()
+        return 200, payroll
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.patch("/{payroll_id}/status", response=PayrollResponseSchema)
+@router.patch("/{payroll_id}/status", response={200: PayrollResponseSchema, 400: MessageSchema})
 def update_payroll_status(request, payroll_id: int, status: str = Query(...)):
     """Update only the status of a payroll record"""
-    payroll = get_object_or_404(Payroll, id=payroll_id)
+    try:
+        payroll = get_object_or_404(Payroll, id=payroll_id)
 
-    valid_statuses = ['Pending', 'Approved', 'Paid', 'Cancelled']
-    if status not in valid_statuses:
-        raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
+        valid_statuses = ['Pending', 'Approved', 'Paid', 'Cancelled']
+        if status not in valid_statuses:
+            raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
 
-    payroll.status = status
-    payroll.save()
-    return payroll
+        payroll.status = status
+        payroll.save()
+        return 200, payroll
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.delete("/{payroll_id}", response={204: None})
+@router.delete("/{payroll_id}", response={204: None, 400: MessageSchema})
 def delete_payroll(request, payroll_id: int):
     """Delete a payroll record"""
-    payroll = get_object_or_404(Payroll, id=payroll_id)
-    payroll.delete()
-    return 204, None
+    try:
+        payroll = get_object_or_404(Payroll, id=payroll_id)
+        payroll.delete()
+        return 204, None
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}

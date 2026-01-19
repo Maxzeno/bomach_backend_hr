@@ -78,57 +78,50 @@ def create_job_posting(request, payload: JobPostingCreateSchema):
     except ValidationError as e:
         return 400, {'detail': e.messages[0]}
 
-@router.put('/{job_posting_id}', response=JobPostingResponseSchema)
+@router.put('/{job_posting_id}', response={200: JobPostingResponseSchema, 400: MessageSchema})
 def update_job_posting(request, job_posting_id: int, payload: JobPostingUpdateSchema):
     """
     Update a job posting (full update).
     """
-    job_posting = get_object_or_404(JobPosting, id=job_posting_id)
+    try:
+        job_posting = get_object_or_404(JobPosting, id=job_posting_id)
 
-    update_data = payload.model_dump(exclude_unset=True)
+        update_data = payload.model_dump(exclude_unset=True)
 
-    for attr, value in update_data.items():
-        setattr(job_posting, attr, value)
+        for attr, value in update_data.items():
+            setattr(job_posting, attr, value)
 
-    job_posting.save()
-    return job_posting
-
-
-@router.patch('/{job_posting_id}', response=JobPostingResponseSchema)
-def partial_update_job_posting(request, job_posting_id: int, payload: JobPostingUpdateSchema):
-    """
-    Partially update a job posting.
-    """
-    job_posting = get_object_or_404(JobPosting, id=job_posting_id)
-
-    update_data = payload.model_dump(exclude_unset=True)
-
-    for attr, value in update_data.items():
-        setattr(job_posting, attr, value)
-
-    job_posting.save()
-    return job_posting
+        job_posting.save()
+        return 200, job_posting
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.patch('/{job_posting_id}/status', response=JobPostingResponseSchema)
+@router.patch('/{job_posting_id}/status', response={200: JobPostingResponseSchema, 400: MessageSchema})
 def update_job_posting_status(request, job_posting_id: int, payload: JobPostingStatusUpdateSchema):
     """
     Update only the status of a job posting.
     """
-    job_posting = get_object_or_404(JobPosting, id=job_posting_id)
-    job_posting.status = payload.status
-    job_posting.save(update_fields=['status', 'updated_at'])
-    return job_posting
+    try:
+        job_posting = get_object_or_404(JobPosting, id=job_posting_id)
+        job_posting.status = payload.status
+        job_posting.save(update_fields=['status', 'updated_at'])
+        return 200, job_posting
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.delete('/{job_posting_id}', response={200: MessageSchema, 204: None})
+@router.delete('/{job_posting_id}', response={200: MessageSchema, 204: None, 400: MessageSchema})
 def delete_job_posting(request, job_posting_id: int):
     """
     Delete a job posting.
     """
-    job_posting = get_object_or_404(JobPosting, id=job_posting_id)
-    job_posting.delete()
-    return 200, {'detail': f'Job posting "{job_posting.job_title}" deleted successfully'}
+    try:
+        job_posting = get_object_or_404(JobPosting, id=job_posting_id)
+        job_posting.delete()
+        return 200, {'detail': f'Job posting "{job_posting.job_title}" deleted successfully'}
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
 @router.get('/stats/summary', response=dict)

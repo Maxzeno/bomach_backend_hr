@@ -1,6 +1,7 @@
 from typing import List, Optional
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 from ninja import Router, Query
 from hr.models import Associate
 from hr.api.schemas import (
@@ -9,18 +10,22 @@ from hr.api.schemas import (
     AssociateResponseSchema,
     AssociateListSchema,
     AssociateFilterSchema,
+    MessageSchema,
 )
 from ninja.pagination import paginate, LimitOffsetPagination
 
 router = Router(tags=['Associates'])
 
 
-@router.post("/", response={201: AssociateResponseSchema})
+@router.post("/", response={201: AssociateResponseSchema, 400: MessageSchema})
 def create_associate(request, payload: AssociateCreateSchema):
     """Create a new associate"""
-    data = payload.model_dump()
-    associate = Associate.objects.create(**data)
-    return 201, associate
+    try:
+        data = payload.model_dump()
+        associate = Associate.objects.create(**data)
+        return 201, associate
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
 @router.get("/", response=List[AssociateListSchema])
@@ -76,44 +81,53 @@ def get_associate(request, associate_id: int):
     return associate
 
 
-@router.put("/{associate_id}", response=AssociateResponseSchema)
+@router.put("/{associate_id}", response={200: AssociateResponseSchema, 400: MessageSchema})
 def update_associate(request, associate_id: int, payload: AssociateUpdateSchema):
     """Update an associate"""
-    associate = get_object_or_404(Associate, id=associate_id)
+    try:
+        associate = get_object_or_404(Associate, id=associate_id)
 
-    update_data = payload.model_dump(exclude_unset=True)
+        update_data = payload.model_dump(exclude_unset=True)
 
-    # Validate date logic if both dates are being updated
-    start_date = update_data.get('contract_start_date', associate.contract_start_date)
-    end_date = update_data.get('contract_end_date', associate.contract_end_date)
+        # Validate date logic if both dates are being updated
+        start_date = update_data.get('contract_start_date', associate.contract_start_date)
+        end_date = update_data.get('contract_end_date', associate.contract_end_date)
 
-    if start_date and end_date and end_date < start_date:
-        raise ValueError('Contract end date must be after start date')
+        if start_date and end_date and end_date < start_date:
+            raise ValueError('Contract end date must be after start date')
 
-    for attr, value in update_data.items():
-        setattr(associate, attr, value)
+        for attr, value in update_data.items():
+            setattr(associate, attr, value)
 
-    associate.save()
-    return associate
+        associate.save()
+        return 200, associate
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.patch("/{associate_id}/status", response=AssociateResponseSchema)
+@router.patch("/{associate_id}/status", response={200: AssociateResponseSchema, 400: MessageSchema})
 def update_associate_status(request, associate_id: int, status: str = Query(...)):
     """Update only the status of an associate"""
-    associate = get_object_or_404(Associate, id=associate_id)
+    try:
+        associate = get_object_or_404(Associate, id=associate_id)
 
-    valid_statuses = ['Active', 'Pending', 'Expired', 'Terminated']
-    if status not in valid_statuses:
-        raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
+        valid_statuses = ['Active', 'Pending', 'Expired', 'Terminated']
+        if status not in valid_statuses:
+            raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
 
-    associate.status = status
-    associate.save()
-    return associate
+        associate.status = status
+        associate.save()
+        return 200, associate
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.delete("/{associate_id}", response={204: None})
+@router.delete("/{associate_id}", response={204: None, 400: MessageSchema})
 def delete_associate(request, associate_id: int):
     """Delete an associate"""
-    associate = get_object_or_404(Associate, id=associate_id)
-    associate.delete()
-    return 204, None
+    try:
+        associate = get_object_or_404(Associate, id=associate_id)
+        associate.delete()
+        return 204, None
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}

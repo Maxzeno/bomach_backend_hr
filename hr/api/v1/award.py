@@ -2,22 +2,27 @@ from typing import List
 from ninja import Router
 from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
 from hr.models.award import Award
 from hr.models.associate import Associate
 from hr.api.schemas.award import AwardSchema, AwardCreateSchema, AwardUpdateSchema
+from hr.api.schemas import MessageSchema
 
 router = Router(tags=["Awards"])
 
-@router.post("/", response=AwardSchema)
+@router.post("/", response={201: AwardSchema, 400: MessageSchema})
 def create_award(request, payload: AwardCreateSchema):
-    award = Award.objects.create(
-        title=payload.title,
-        category=payload.category,
-        date_awarded=payload.date_awarded,
-        rank_level=payload.rank_level,
-        description=payload.description
-    )
-    return award
+    try:
+        award = Award.objects.create(
+            title=payload.title,
+            category=payload.category,
+            date_awarded=payload.date_awarded,
+            rank_level=payload.rank_level,
+            description=payload.description
+        )
+        return 201, award
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 @router.get("/", response=List[AwardSchema])
 @paginate(LimitOffsetPagination, page_size=10)
@@ -31,16 +36,22 @@ def list_awards(request, year: int = None):
 def get_award(request, award_id: int):
     return get_object_or_404(Award, id=award_id)
 
-@router.put("/{award_id}", response=AwardSchema)
+@router.put("/{award_id}", response={200: AwardSchema, 400: MessageSchema})
 def update_award(request, award_id: int, payload: AwardUpdateSchema):
-    award = get_object_or_404(Award, id=award_id)
-    for attr, value in payload.model_dump(exclude_unset=True).items():
-        setattr(award, attr, value)
-    award.save()
-    return award
+    try:
+        award = get_object_or_404(Award, id=award_id)
+        for attr, value in payload.model_dump(exclude_unset=True).items():
+            setattr(award, attr, value)
+        award.save()
+        return 200, award
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
-@router.delete("/{award_id}")
+@router.delete("/{award_id}", response={200: MessageSchema, 400: MessageSchema})
 def delete_award(request, award_id: int):
-    award = get_object_or_404(Award, id=award_id)
-    award.delete()
-    return {"success": True}
+    try:
+        award = get_object_or_404(Award, id=award_id)
+        award.delete()
+        return 200, {"detail": "Deleted successfully"}
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}

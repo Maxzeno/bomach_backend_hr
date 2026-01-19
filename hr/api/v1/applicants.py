@@ -3,6 +3,7 @@ from ninja import Router
 from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 
 from hr.models import Applicant, JobPosting
 from hr.api.schemas import (
@@ -66,124 +67,115 @@ def get_applicant(request, applicant_id: int):
     return applicant
 
 
-@router.post('/', response={201: ApplicantResponseSchema})
+@router.post('/', response={201: ApplicantResponseSchema, 400: MessageSchema})
 def create_applicant(request, payload: ApplicantCreateSchema):
     """
     Create a new applicant.
     """
-    data = payload.model_dump(exclude={'job_posting_id'})
+    try:
+        data = payload.model_dump(exclude={'job_posting_id'})
 
-    # Get the job posting
-    job_posting = get_object_or_404(JobPosting, id=payload.job_posting_id)
-    data['job_posting'] = job_posting
+        # Get the job posting
+        job_posting = get_object_or_404(JobPosting, id=payload.job_posting_id)
+        data['job_posting'] = job_posting
 
-    applicant = Applicant.objects.create(**data)
+        applicant = Applicant.objects.create(**data)
 
-    # Increment job posting applicants count
-    job_posting.increment_applicants()
+        # Increment job posting applicants count
+        job_posting.increment_applicants()
 
-    return 201, applicant
+        return 201, applicant
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.put('/{applicant_id}', response=ApplicantResponseSchema)
+@router.put('/{applicant_id}', response={200: ApplicantResponseSchema, 400: MessageSchema})
 def update_applicant(request, applicant_id: int, payload: ApplicantUpdateSchema):
     """
     Update an applicant (full update).
     """
-    applicant = get_object_or_404(Applicant, id=applicant_id)
+    try:
+        applicant = get_object_or_404(Applicant, id=applicant_id)
 
-    update_data = payload.model_dump(exclude_unset=True, exclude={'job_posting_id'})
+        update_data = payload.model_dump(exclude_unset=True, exclude={'job_posting_id'})
 
-    # Handle job posting update if provided
-    if 'job_posting_id' in payload.model_dump(exclude_unset=True):
-        old_job_posting = applicant.job_posting
-        new_job_posting = get_object_or_404(JobPosting, id=payload.job_posting_id)
+        # Handle job posting update if provided
+        if 'job_posting_id' in payload.model_dump(exclude_unset=True):
+            old_job_posting = applicant.job_posting
+            new_job_posting = get_object_or_404(JobPosting, id=payload.job_posting_id)
 
-        if old_job_posting.id != new_job_posting.id:
-            # Update counts
-            old_job_posting.decrement_applicants()
-            new_job_posting.increment_applicants()
-            applicant.job_posting = new_job_posting
+            if old_job_posting.id != new_job_posting.id:
+                # Update counts
+                old_job_posting.decrement_applicants()
+                new_job_posting.increment_applicants()
+                applicant.job_posting = new_job_posting
 
-    for attr, value in update_data.items():
-        setattr(applicant, attr, value)
+        for attr, value in update_data.items():
+            setattr(applicant, attr, value)
 
-    applicant.save()
-    return applicant
-
-
-@router.patch('/{applicant_id}', response=ApplicantResponseSchema)
-def partial_update_applicant(request, applicant_id: int, payload: ApplicantUpdateSchema):
-    """
-    Partially update an applicant.
-    """
-    applicant = get_object_or_404(Applicant, id=applicant_id)
-
-    update_data = payload.model_dump(exclude_unset=True, exclude={'job_posting_id'})
-
-    # Handle job posting update if provided
-    if 'job_posting_id' in payload.model_dump(exclude_unset=True):
-        old_job_posting = applicant.job_posting
-        new_job_posting = get_object_or_404(JobPosting, id=payload.job_posting_id)
-
-        if old_job_posting.id != new_job_posting.id:
-            # Update counts
-            old_job_posting.decrement_applicants()
-            new_job_posting.increment_applicants()
-            applicant.job_posting = new_job_posting
-
-    for attr, value in update_data.items():
-        setattr(applicant, attr, value)
-
-    applicant.save()
-    return applicant
+        applicant.save()
+        return 200, applicant
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.patch('/{applicant_id}/stage', response=ApplicantResponseSchema)
+@router.patch('/{applicant_id}/stage', response={200: ApplicantResponseSchema, 400: MessageSchema})
 def update_applicant_stage(request, applicant_id: int, payload: ApplicantStageUpdateSchema):
     """
     Update only the stage of an applicant.
     """
-    applicant = get_object_or_404(Applicant, id=applicant_id)
-    applicant.stage = payload.stage
-    applicant.save(update_fields=['stage', 'updated_at'])
-    return applicant
+    try:
+        applicant = get_object_or_404(Applicant, id=applicant_id)
+        applicant.stage = payload.stage
+        applicant.save(update_fields=['stage', 'updated_at'])
+        return 200, applicant
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.patch('/{applicant_id}/status', response=ApplicantResponseSchema)
+@router.patch('/{applicant_id}/status', response={200: ApplicantResponseSchema, 400: MessageSchema})
 def update_applicant_status(request, applicant_id: int, payload: ApplicantStatusUpdateSchema):
     """
     Update only the status of an applicant.
     """
-    applicant = get_object_or_404(Applicant, id=applicant_id)
-    applicant.status = payload.status
-    applicant.save(update_fields=['status', 'updated_at'])
-    return applicant
+    try:
+        applicant = get_object_or_404(Applicant, id=applicant_id)
+        applicant.status = payload.status
+        applicant.save(update_fields=['status', 'updated_at'])
+        return 200, applicant
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.patch('/{applicant_id}/rating', response=ApplicantResponseSchema)
+@router.patch('/{applicant_id}/rating', response={200: ApplicantResponseSchema, 400: MessageSchema})
 def update_applicant_rating(request, applicant_id: int, payload: ApplicantRatingUpdateSchema):
     """
     Update only the rating of an applicant.
     """
-    applicant = get_object_or_404(Applicant, id=applicant_id)
-    applicant.rating = payload.rating
-    applicant.save(update_fields=['rating', 'updated_at'])
-    return applicant
+    try:
+        applicant = get_object_or_404(Applicant, id=applicant_id)
+        applicant.rating = payload.rating
+        applicant.save(update_fields=['rating', 'updated_at'])
+        return 200, applicant
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.delete('/{applicant_id}', response={200: MessageSchema, 204: None})
+@router.delete('/{applicant_id}', response={200: MessageSchema, 204: None, 400: MessageSchema})
 def delete_applicant(request, applicant_id: int):
     """
     Delete an applicant.
     """
-    applicant = get_object_or_404(Applicant, id=applicant_id)
-    job_posting = applicant.job_posting
-    applicant_name = applicant.full_name
+    try:
+        applicant = get_object_or_404(Applicant, id=applicant_id)
+        job_posting = applicant.job_posting
+        applicant_name = applicant.full_name
 
-    applicant.delete()
+        applicant.delete()
 
-    # Decrement job posting applicants count
-    job_posting.decrement_applicants()
+        # Decrement job posting applicants count
+        job_posting.decrement_applicants()
 
-    return 200, {'detail': f'Applicant "{applicant_name}" deleted successfully'}
+        return 200, {'detail': f'Applicant "{applicant_name}" deleted successfully'}
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}

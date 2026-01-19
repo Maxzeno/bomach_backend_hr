@@ -4,6 +4,7 @@ from ninja import Router
 from ninja.pagination import paginate, LimitOffsetPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 
 from hr.models import LeaveRequest
 from hr.api.schemas import (
@@ -66,76 +67,72 @@ def get_leave_request(request, leave_request_id: int):
     return leave_request
 
 
-@router.post('/', response={201: LeaveRequestResponseSchema})
+@router.post('/', response={201: LeaveRequestResponseSchema, 400: MessageSchema})
 def create_leave_request(request, payload: LeaveRequestCreateSchema):
     """
     Create a new leave request.
     """
-    data = payload.model_dump()
-    leave_request = LeaveRequest.objects.create(**data)
-    return 201, leave_request
+    try:
+        data = payload.model_dump()
+        leave_request = LeaveRequest.objects.create(**data)
+        return 201, leave_request
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.put('/{leave_request_id}', response=LeaveRequestResponseSchema)
+@router.put('/{leave_request_id}', response={200: LeaveRequestResponseSchema, 400: MessageSchema})
 def update_leave_request(request, leave_request_id: int, payload: LeaveRequestUpdateSchema):
     """
     Update a leave request (full update).
     """
-    leave_request = get_object_or_404(LeaveRequest, id=leave_request_id)
+    try:
+        leave_request = get_object_or_404(LeaveRequest, id=leave_request_id)
 
-    update_data = payload.model_dump(exclude_unset=True)
+        update_data = payload.model_dump(exclude_unset=True)
 
-    for attr, value in update_data.items():
-        setattr(leave_request, attr, value)
+        for attr, value in update_data.items():
+            setattr(leave_request, attr, value)
 
-    leave_request.save()
-    return leave_request
-
-
-@router.patch('/{leave_request_id}', response=LeaveRequestResponseSchema)
-def partial_update_leave_request(request, leave_request_id: int, payload: LeaveRequestUpdateSchema):
-    """
-    Partially update a leave request.
-    """
-    leave_request = get_object_or_404(LeaveRequest, id=leave_request_id)
-
-    update_data = payload.model_dump(exclude_unset=True)
-
-    for attr, value in update_data.items():
-        setattr(leave_request, attr, value)
-
-    leave_request.save()
-    return leave_request
+        leave_request.save()
+        return 200, leave_request
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.patch('/{leave_request_id}/status', response=LeaveRequestResponseSchema)
+@router.patch('/{leave_request_id}/status', response={200: LeaveRequestResponseSchema, 400: MessageSchema})
 def update_leave_request_status(request, leave_request_id: int, payload: LeaveRequestStatusUpdateSchema):
     """
     Update the status of a leave request.
     Useful for approving or rejecting leave requests.
     """
-    leave_request = get_object_or_404(LeaveRequest, id=leave_request_id)
+    try:
+        leave_request = get_object_or_404(LeaveRequest, id=leave_request_id)
 
-    update_data = payload.model_dump(exclude_unset=True)
-    update_fields = ['status', 'updated_at']
+        update_data = payload.model_dump(exclude_unset=True)
+        update_fields = ['status', 'updated_at']
 
-    for attr, value in update_data.items():
-        setattr(leave_request, attr, value)
-        if attr not in update_fields:
-            update_fields.append(attr)
+        for attr, value in update_data.items():
+            setattr(leave_request, attr, value)
+            if attr not in update_fields:
+                update_fields.append(attr)
 
-    leave_request.save(update_fields=update_fields)
-    return leave_request
+        leave_request.save(update_fields=update_fields)
+        return 200, leave_request
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
-@router.delete('/{leave_request_id}', response={200: MessageSchema, 204: None})
+@router.delete('/{leave_request_id}', response={200: MessageSchema, 204: None, 400: MessageSchema})
 def delete_leave_request(request, leave_request_id: int):
     """
     Delete a leave request.
     """
-    leave_request = get_object_or_404(LeaveRequest, id=leave_request_id)
-    leave_request.delete()
-    return 200, {'detail': f'Leave request deleted successfully'}
+    try:
+        leave_request = get_object_or_404(LeaveRequest, id=leave_request_id)
+        leave_request.delete()
+        return 200, {'detail': f'Leave request deleted successfully'}
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 
 @router.get('/stats/summary', response=dict)

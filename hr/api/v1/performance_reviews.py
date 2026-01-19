@@ -1,6 +1,7 @@
 from typing import List
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 from ninja import Router, Query
 from hr.models.performance_review import PerformanceReview
 from hr.api.schemas import (
@@ -9,15 +10,19 @@ from hr.api.schemas import (
     PerformanceReviewResponseSchema,
     PerformanceReviewFilterSchema,
     PaginatedResponse,
+    MessageSchema,
 )
 from ninja.pagination import paginate, LimitOffsetPagination
 
 router = Router(tags=['Performance Reviews'])
 
-@router.post("/", response={201: PerformanceReviewResponseSchema}, auth=None)
+@router.post("/", response={201: PerformanceReviewResponseSchema, 400: MessageSchema}, auth=None)
 def create_performance_review(request, payload: PerformanceReviewCreateSchema):
-    review = PerformanceReview.objects.create(**payload.model_dump())
-    return 201, review
+    try:
+        review = PerformanceReview.objects.create(**payload.model_dump())
+        return 201, review
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 @router.get("/", response=List[PerformanceReviewResponseSchema], auth=None)
 @paginate(LimitOffsetPagination, page_size=10)
@@ -46,18 +51,24 @@ def get_performance_review(request, review_id: str):
     review = get_object_or_404(PerformanceReview, id=review_id)
     return review
 
-@router.put("/{review_id}", response=PerformanceReviewResponseSchema)
+@router.put("/{review_id}", response={200: PerformanceReviewResponseSchema, 400: MessageSchema})
 def update_performance_review(request, review_id: str, payload: PerformanceReviewUpdateSchema):
-    review = get_object_or_404(PerformanceReview, id=review_id)
+    try:
+        review = get_object_or_404(PerformanceReview, id=review_id)
 
-    for attr, value in payload.model_dump(exclude_unset=True).items():
-        setattr(review, attr, value)
+        for attr, value in payload.model_dump(exclude_unset=True).items():
+            setattr(review, attr, value)
 
-    review.save()
-    return review
+        review.save()
+        return 200, review
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
-@router.delete("/{review_id}", response={204: None})
+@router.delete("/{review_id}", response={204: None, 400: MessageSchema})
 def delete_performance_review(request, review_id: str):
-    review = get_object_or_404(PerformanceReview, id=review_id)
-    review.delete()
-    return 204, None
+    try:
+        review = get_object_or_404(PerformanceReview, id=review_id)
+        review.delete()
+        return 204, None
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}

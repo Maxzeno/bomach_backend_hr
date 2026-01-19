@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     JobPosting, Applicant, LeaveRequest,
-    PerformanceReview, Payroll, TrainingProgram, Associate, Asset,
+    PerformanceReview, Payroll, TrainingProgram, Asset,
     DailyWorkReport, Award
 )
 
@@ -229,62 +229,6 @@ class TrainingProgramAdmin(admin.ModelAdmin):
         ('Computed Fields', {
             'fields': ('is_ongoing', 'is_upcoming'),
             'classes': ('collapse',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-
-@admin.register(Associate)
-class AssociateAdmin(admin.ModelAdmin):
-    list_display = [
-        'associate_id',
-        'full_name',
-        'email',
-        'role_position',
-        'company_name',
-        'phone_number',
-        'contract_period',
-        'status',
-        'is_contract_active',
-        'created_at',
-    ]
-    list_filter = ['status', 'role_position', 'company_name', 'contract_start_date', 'created_at']
-    search_fields = ['associate_id', 'full_name', 'email', 'company_name', 'phone_number', 'role_position', 'department_id']
-    readonly_fields = ['associate_id', 'created_at', 'updated_at', 'contract_period', 'contract_duration_days', 'is_contract_active', 'is_contract_expired']
-    list_editable = ['status']
-    ordering = ['-created_at']
-    date_hierarchy = 'contract_start_date'
-
-    fieldsets = (
-        ('Associate ID', {
-            'fields': ('associate_id',)
-        }),
-        ('Personal Information', {
-            'fields': ('full_name', 'email', 'phone_number', 'address')
-        }),
-        ('Professional Information', {
-            'fields': ('company_name', 'role_position', 'department_id', 'specialization')
-        }),
-        ('Contract Information', {
-            'fields': (
-                'contract_start_date',
-                'contract_end_date',
-                'contract_period',
-                'contract_duration_days',
-                'contract_value',
-                'payment_terms',
-                'supervisor_point_of_contact',
-                'scope_of_work'
-            )
-        }),
-        ('Documents', {
-            'fields': ('documents',)
-        }),
-        ('Status', {
-            'fields': ('status', 'is_contract_active', 'is_contract_expired')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

@@ -44,13 +44,6 @@ from .training_program import (
     TrainingProgramListSchema,
     TrainingProgramFilterSchema,
 )
-from .associate import (
-    AssociateCreateSchema,
-    AssociateUpdateSchema,
-    AssociateResponseSchema,
-    AssociateListSchema,
-    AssociateFilterSchema,
-)
 from .work_report import (
     WorkReportCreate,
     WorkReportUpdate,

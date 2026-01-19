@@ -11,10 +11,10 @@ class Payroll(BaseModel):
 
     # Status Choices
     STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Approved', 'Approved'),
-        ('Paid', 'Paid'),
-        ('Cancelled', 'Cancelled'),
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('paid', 'Paid'),
+        ('cancelled', 'Cancelled'),
     ]
 
     # Employee Information
@@ -61,7 +61,7 @@ class Payroll(BaseModel):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='Pending',
+        default='pending',
         db_index=True
     )
 

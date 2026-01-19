@@ -9,21 +9,21 @@ class LeaveRequest(BaseModel):
 
     # Leave Type Choices
     LEAVE_TYPE_CHOICES = [
-        ('Sick Leave', 'Sick Leave'),
-        ('Annual Leave', 'Annual Leave'),
-        ('Casual Leave', 'Casual Leave'),
-        ('Maternity Leave', 'Maternity Leave'),
-        ('Paternity Leave', 'Paternity Leave'),
-        ('Unpaid Leave', 'Unpaid Leave'),
-        ('Compassionate Leave', 'Compassionate Leave'),
+        ('sick_leave', 'Sick Leave'),
+        ('annual_leave', 'Annual Leave'),
+        ('casual_leave', 'Casual Leave'),
+        ('maternity_leave', 'Maternity Leave'),
+        ('paternity_leave', 'Paternity Leave'),
+        ('unpaid_leave', 'Unpaid Leave'),
+        ('compassionate_leave', 'Compassionate Leave'),
     ]
 
     # Status Choices
     STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Approved', 'Approved'),
-        ('Rejected', 'Rejected'),
-        ('Cancelled', 'Cancelled'),
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('cancelled', 'Cancelled'),
     ]
 
     # Employee Information
@@ -39,7 +39,7 @@ class LeaveRequest(BaseModel):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='Pending',
+        default='pending',
         db_index=True
     )
 

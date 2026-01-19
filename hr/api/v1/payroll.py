@@ -87,7 +87,7 @@ def update_payroll_status(request, payroll_id: int, status: str = Query(...)):
     try:
         payroll = get_object_or_404(Payroll, id=payroll_id)
 
-        valid_statuses = ['Pending', 'Approved', 'Paid', 'Cancelled']
+        valid_statuses = ['pending', 'approved', 'paid', 'cancelled']
         if status not in valid_statuses:
             raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
 

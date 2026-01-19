@@ -8,7 +8,7 @@ class Award(BaseModel):
         ('best_branch_representative', 'Best branch representative'),
         ('regional_leader', 'Regional leader'),
         ('dependable_team_member', 'Dependable team member'),
-        ('Other', 'Other'),
+        ('other', 'Other'),
     ]
 
     RANK_LEVEL_CHOICES = [

@@ -105,7 +105,7 @@ def update_training_program_status(request, program_id: int, status: str = Query
     try:
         program = get_object_or_404(TrainingProgram, id=program_id)
 
-        valid_statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled']
+        valid_statuses = ['pending', 'in_progress', 'completed', 'cancelled']
         if status not in valid_statuses:
             raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
 

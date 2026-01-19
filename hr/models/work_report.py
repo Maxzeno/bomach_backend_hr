@@ -10,19 +10,19 @@ class DailyWorkReport(BaseModel):
     """Model for tracking daily work reports from employees"""
 
     MOOD_CHOICES = [
-        ('Happy', 'Happy'),
-        ('Neutral', 'Neutral'),
-        ('Sad', 'Sad'),
-        ('Stressed', 'Stressed'),
-        ('Tired', 'Tired'),
-        ('Frustrated', 'Frustrated'),
+        ('happy', 'Happy'),
+        ('neutral', 'Neutral'),
+        ('sad', 'Sad'),
+        ('stressed', 'Stressed'),
+        ('tired', 'Tired'),
+        ('frustrated', 'Frustrated'),
     ]
 
     STATUS_CHOICES = [
-        ('Draft', 'Draft'),
-        ('Submitted', 'Submitted'),
-        ('Approved', 'Approved'),
-        ('Rejected', 'Rejected'),
+        ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
     ]
 
     # Employee Information (employee_id references main backend Employee)
@@ -40,7 +40,7 @@ class DailyWorkReport(BaseModel):
     mood = models.CharField(
         max_length=20,
         choices=MOOD_CHOICES,
-        default='Neutral'
+        default='neutral'
     )
     
     # Content
@@ -62,7 +62,7 @@ class DailyWorkReport(BaseModel):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='Draft',
+        default='draft',
         db_index=True
     )
 

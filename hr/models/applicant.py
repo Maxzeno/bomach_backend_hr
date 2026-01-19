@@ -12,18 +12,18 @@ class Applicant(BaseModel):
     """
 
     class Stage(models.TextChoices):
-        APPLIED = 'Applied', 'Applied'
-        SCREENING = 'Screening', 'Screening'
-        INTERVIEW = 'Interview', 'Interview'
-        OFFERED = 'Offered', 'Offered'
-        REJECTED = 'Rejected', 'Rejected'
+        APPLIED = 'applied', 'Applied'
+        SCREENING = 'screening', 'Screening'
+        INTERVIEW = 'interview', 'Interview'
+        OFFERED = 'offered', 'Offered'
+        REJECTED = 'rejected', 'Rejected'
 
     class Status(models.TextChoices):
-        NEW = 'New', 'New'
-        IN_REVIEW = 'In Review', 'In Review'
-        SHORTLISTED = 'Shortlisted', 'Shortlisted'
-        HIRED = 'Hired', 'Hired'
-        REJECTED = 'Rejected', 'Rejected'
+        NEW = 'new', 'New'
+        IN_REVIEW = 'in_review', 'In Review'
+        SHORTLISTED = 'shortlisted', 'Shortlisted'
+        HIRED = 'hired', 'Hired'
+        REJECTED = 'rejected', 'Rejected'
 
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)

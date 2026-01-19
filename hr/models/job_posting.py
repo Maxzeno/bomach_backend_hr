@@ -10,18 +10,18 @@ class JobPosting(BaseModel):
     """
 
     class JobType(models.TextChoices):
-        FULL_TIME = 'Full-Time', 'Full-Time'
-        PART_TIME = 'Part-Time', 'Part-Time'
-        CONTRACT = 'Contract', 'Contract'
-        INTERNSHIP = 'Internship', 'Internship'
-        TEMPORARY = 'Temporary', 'Temporary'
+        FULL_TIME = 'full_time', 'Full-Time'
+        PART_TIME = 'part_time', 'Part-Time'
+        CONTRACT = 'contract', 'Contract'
+        INTERNSHIP = 'internship', 'Internship'
+        TEMPORARY = 'temporary', 'Temporary'
 
     class Status(models.TextChoices):
-        DRAFT = 'Draft', 'Draft'
-        PENDING = 'Pending', 'Pending'
-        ACTIVE = 'Active', 'Active'
-        CLOSED = 'Closed', 'Closed'
-        CANCELLED = 'Cancelled', 'Cancelled'
+        DRAFT = 'draft', 'Draft'
+        PENDING = 'pending', 'Pending'
+        ACTIVE = 'active', 'Active'
+        CLOSED = 'closed', 'Closed'
+        CANCELLED = 'cancelled', 'Cancelled'
 
     job_title = models.CharField(max_length=255)
     department_id = models.CharField(

@@ -130,10 +130,10 @@ def get_job_postings_summary(request):
     Get summary statistics for job postings.
     """
     total = JobPosting.objects.count()
-    active = JobPosting.objects.filter(status='Active').count()
-    pending = JobPosting.objects.filter(status='Pending').count()
-    closed = JobPosting.objects.filter(status='Closed').count()
-    draft = JobPosting.objects.filter(status='Draft').count()
+    active = JobPosting.objects.filter(status='active').count()
+    pending = JobPosting.objects.filter(status='pending').count()
+    closed = JobPosting.objects.filter(status='closed').count()
+    draft = JobPosting.objects.filter(status='draft').count()
 
     return {
         'total': total,

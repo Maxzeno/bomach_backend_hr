@@ -142,10 +142,10 @@ def get_leave_requests_summary(request):
     Returns counts by status.
     """
     total = LeaveRequest.objects.count()
-    pending = LeaveRequest.objects.filter(status='Pending').count()
-    approved = LeaveRequest.objects.filter(status='Approved').count()
-    rejected = LeaveRequest.objects.filter(status='Rejected').count()
-    cancelled = LeaveRequest.objects.filter(status='Cancelled').count()
+    pending = LeaveRequest.objects.filter(status='pending').count()
+    approved = LeaveRequest.objects.filter(status='approved').count()
+    rejected = LeaveRequest.objects.filter(status='rejected').count()
+    cancelled = LeaveRequest.objects.filter(status='cancelled').count()
 
     return {
         'total': total,
@@ -162,9 +162,9 @@ def get_employee_leave_stats(request, employee_id: str):
     Get leave request statistics for a specific employee.
     """
     total = LeaveRequest.objects.filter(employee_id=employee_id).count()
-    pending = LeaveRequest.objects.filter(employee_id=employee_id, status='Pending').count()
-    approved = LeaveRequest.objects.filter(employee_id=employee_id, status='Approved').count()
-    rejected = LeaveRequest.objects.filter(employee_id=employee_id, status='Rejected').count()
+    pending = LeaveRequest.objects.filter(employee_id=employee_id, status='pending').count()
+    approved = LeaveRequest.objects.filter(employee_id=employee_id, status='approved').count()
+    rejected = LeaveRequest.objects.filter(employee_id=employee_id, status='rejected').count()
 
     return {
         'employee_id': employee_id,

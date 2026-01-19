@@ -13,7 +13,7 @@ class TrainingProgramCreateSchema(Schema):
     end_date: date
     cost: Decimal = Field(..., gt=0, decimal_places=2)
     target_audience: str
-    status: str = "Pending"
+    status: str = "pending"
 
     @validator('end_date')
     def validate_dates(cls, v, values):
@@ -23,7 +23,7 @@ class TrainingProgramCreateSchema(Schema):
 
     @validator('status')
     def validate_status(cls, v):
-        valid_statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled']
+        valid_statuses = ['pending', 'in_progress', 'completed', 'cancelled']
         if v not in valid_statuses:
             raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
         return v
@@ -31,8 +31,8 @@ class TrainingProgramCreateSchema(Schema):
     @validator('target_audience')
     def validate_target_audience(cls, v):
         valid_audiences = [
-            'All Employees', 'Management', 'New Hires', 'Department Specific',
-            'Leadership Team', 'Technical Staff', 'Sales Team', 'Customer Service'
+            'all_employees', 'management', 'new_hires', 'department_specific',
+            'leadership_team', 'technical_staff', 'sales_team', 'customer_service'
         ]
         if v not in valid_audiences:
             raise ValueError(f'Target audience must be one of: {", ".join(valid_audiences)}')
@@ -52,7 +52,7 @@ class TrainingProgramUpdateSchema(Schema):
     @validator('status')
     def validate_status(cls, v):
         if v is not None:
-            valid_statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled']
+            valid_statuses = ['pending', 'in_progress', 'completed', 'cancelled']
             if v not in valid_statuses:
                 raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
         return v
@@ -61,8 +61,8 @@ class TrainingProgramUpdateSchema(Schema):
     def validate_target_audience(cls, v):
         if v is not None:
             valid_audiences = [
-                'All Employees', 'Management', 'New Hires', 'Department Specific',
-                'Leadership Team', 'Technical Staff', 'Sales Team', 'Customer Service'
+                'all_employees', 'management', 'new_hires', 'department_specific',
+                'leadership_team', 'technical_staff', 'sales_team', 'customer_service'
             ]
             if v not in valid_audiences:
                 raise ValueError(f'Target audience must be one of: {", ".join(valid_audiences)}')

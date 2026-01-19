@@ -14,11 +14,11 @@ class PayrollCreateSchema(Schema):
     allowances: Optional[Dict[str, float]] = Field(default_factory=dict)
     deductions: Optional[Dict[str, float]] = Field(default_factory=dict)
     disbursement_date: date
-    status: str = "Pending"
+    status: str = "pending"
 
     @validator('status')
     def validate_status(cls, v):
-        valid_statuses = ['Pending', 'Approved', 'Paid', 'Cancelled']
+        valid_statuses = ['pending', 'approved', 'paid', 'cancelled']
         if v not in valid_statuses:
             raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
         return v
@@ -43,7 +43,7 @@ class PayrollUpdateSchema(Schema):
     @validator('status')
     def validate_status(cls, v):
         if v is not None:
-            valid_statuses = ['Pending', 'Approved', 'Paid', 'Cancelled']
+            valid_statuses = ['pending', 'approved', 'paid', 'cancelled']
             if v not in valid_statuses:
                 raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
         return v

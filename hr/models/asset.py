@@ -9,27 +9,27 @@ class Asset(BaseModel):
     """Model for company assets"""
 
     ASSET_TYPE_CHOICES = [
-        ('Laptop', 'Laptop'),
-        ('Printer', 'Printer'),
-        ('Vehicle', 'Vehicle'),
-        ('Furniture', 'Furniture'),
-        ('Equipment', 'Equipment'),
-        ('Other', 'Other'),
+        ('laptop', 'Laptop'),
+        ('printer', 'Printer'),
+        ('vehicle', 'Vehicle'),
+        ('furniture', 'Furniture'),
+        ('equipment', 'Equipment'),
+        ('other', 'Other'),
     ]
 
     STATUS_CHOICES = [
-        ('In Use', 'In Use'),
-        ('Maintenance', 'Maintenance'),
-        ('Available', 'Available'),
-        ('Retired', 'Retired'),
-        ('Lost/Stolen', 'Lost/Stolen'),
+        ('in_use', 'In Use'),
+        ('maintenance', 'Maintenance'),
+        ('available', 'Available'),
+        ('retired', 'Retired'),
+        ('lost_stolen', 'Lost/Stolen'),
     ]
 
     name = models.CharField(max_length=255, help_text="Name of the asset")
     asset_type = models.CharField(
         max_length=50,
         choices=ASSET_TYPE_CHOICES,
-        default='Equipment'
+        default='equipment'
     )
     serial_number = models.CharField(max_length=100, blank=True, null=True)
     manufacturer = models.CharField(max_length=100, blank=True, null=True)
@@ -70,7 +70,7 @@ class Asset(BaseModel):
     status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,
-        default='Available',
+        default='available',
         db_index=True
     )
     warranty_expiry_date = models.DateField(blank=True, null=True)

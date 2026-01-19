@@ -13,7 +13,7 @@ class AssetCreate(Schema):
     value: Optional[Decimal] = None
     vendor: Optional[str] = None
     invoice_number: Optional[str] = None
-    status: Optional[str] = 'Available'
+    status: Optional[str] = 'available'
     warranty_expiry_date: Optional[date] = None
     notes: Optional[str] = None
     serial_number: Optional[str] = None

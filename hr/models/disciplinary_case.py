@@ -10,13 +10,13 @@ class DisciplinaryCase(models.Model):
     """
     
     # Action Type Choices
-    VERBAL_WARNING = 'Verbal Warning'
-    WRITTEN_WARNING = 'Written Warning'
-    FINAL_WARNING = 'Final Warning'
-    SUSPENSION = 'Suspension'
-    TERMINATION = 'Termination'
-    DEMOTION = 'Demotion'
-    
+    VERBAL_WARNING = 'verbal_warning'
+    WRITTEN_WARNING = 'written_warning'
+    FINAL_WARNING = 'final_warning'
+    SUSPENSION = 'suspension'
+    TERMINATION = 'termination'
+    DEMOTION = 'demotion'
+
     ACTION_TYPE_CHOICES = [
         (VERBAL_WARNING, 'Verbal Warning'),
         (WRITTEN_WARNING, 'Written Warning'),
@@ -25,18 +25,18 @@ class DisciplinaryCase(models.Model):
         (FINAL_WARNING, 'Final Warning'),
         (DEMOTION, 'Demotion'),
     ]
-    
+
     # Violation Category Choices
-    ATTENDANCE_ISSUES = 'Attendance Issues'
-    MISCONDUCT = 'Misconduct'
-    POOR_PERFORMANCE = 'Poor Performance'
-    INSUBORDINATION = 'Insubordination'
-    DISHONESTY = 'Dishonesty'
-    SAFETY_VIOLATION = 'Safety Violation'
-    CONFIDENTIALITY_BREACH = 'Confidentiality Breach'
-    HARASSMENT_DISCRIMINATION = 'Harassment/Discrimination'
-    OTHER = 'Other'
-    
+    ATTENDANCE_ISSUES = 'attendance_issues'
+    MISCONDUCT = 'misconduct'
+    POOR_PERFORMANCE = 'poor_performance'
+    INSUBORDINATION = 'insubordination'
+    DISHONESTY = 'dishonesty'
+    SAFETY_VIOLATION = 'safety_violation'
+    CONFIDENTIALITY_BREACH = 'confidentiality_breach'
+    HARASSMENT_DISCRIMINATION = 'harassment_discrimination'
+    OTHER = 'other'
+
     VIOLATION_CATEGORY_CHOICES = [
         (ATTENDANCE_ISSUES, 'Attendance Issues'),
         (MISCONDUCT, 'Misconduct'),

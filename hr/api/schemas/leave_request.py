@@ -7,13 +7,13 @@ class LeaveRequestCreateSchema(BaseModel):
     """Schema for creating a new leave request"""
     employee_id: str = Field(..., min_length=1, max_length=50)
     leave_type: Literal[
-        'Sick Leave',
-        'Annual Leave',
-        'Casual Leave',
-        'Maternity Leave',
-        'Paternity Leave',
-        'Unpaid Leave',
-        'Compassionate Leave'
+        'sick_leave',
+        'annual_leave',
+        'casual_leave',
+        'maternity_leave',
+        'paternity_leave',
+        'unpaid_leave',
+        'compassionate_leave'
     ] = Field(..., description="Type of leave")
     start_date: date = Field(..., description="Leave start date")
     end_date: date = Field(..., description="Leave end date")
@@ -31,18 +31,18 @@ class LeaveRequestUpdateSchema(BaseModel):
     """Schema for updating a leave request"""
     employee_id: Optional[str] = Field(None, min_length=1, max_length=50)
     leave_type: Optional[Literal[
-        'Sick Leave',
-        'Annual Leave',
-        'Casual Leave',
-        'Maternity Leave',
-        'Paternity Leave',
-        'Unpaid Leave',
-        'Compassionate Leave'
+        'sick_leave',
+        'annual_leave',
+        'casual_leave',
+        'maternity_leave',
+        'paternity_leave',
+        'unpaid_leave',
+        'compassionate_leave'
     ]] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     reason: Optional[str] = None
-    status: Optional[Literal['Pending', 'Approved', 'Rejected', 'Cancelled']] = None
+    status: Optional[Literal['pending', 'approved', 'rejected', 'cancelled']] = None
     approver_id: Optional[str] = Field(None, max_length=50)
     approval_date: Optional[date] = None
     rejection_reason: Optional[str] = None
@@ -50,7 +50,7 @@ class LeaveRequestUpdateSchema(BaseModel):
 
 class LeaveRequestStatusUpdateSchema(BaseModel):
     """Schema for updating leave request status"""
-    status: Literal['Pending', 'Approved', 'Rejected', 'Cancelled'] = Field(
+    status: Literal['pending', 'approved', 'rejected', 'cancelled'] = Field(
         ...,
         description="New status for the leave request"
     )

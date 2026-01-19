@@ -59,11 +59,11 @@ def validate_department_id(department_id: str) -> Dict:
         else:
             logger.error(f"gRPC error validating department: {e.code()} - {e.details()}")
             raise ValidationError(
-                f"Error validating department ID: {e.details()}"
+                f"{e.details()}"
             )
     except Exception as e:
         logger.error(f"Unexpected error validating department {department_id}: {str(e)}")
-        raise ValidationError(f"Error validating department ID: {str(e)}")
+        raise ValidationError(f"{str(e)}")
 
 
 def validate_sub_department_id(sub_department_id: str) -> Dict:
@@ -109,11 +109,11 @@ def validate_sub_department_id(sub_department_id: str) -> Dict:
         else:
             logger.error(f"gRPC error validating sub-department: {e.code()} - {e.details()}")
             raise ValidationError(
-                f"Error validating sub-department ID: {e.details()}"
+                f"{e.details()}"
             )
     except Exception as e:
         logger.error(f"Unexpected error validating sub-department {sub_department_id}: {str(e)}")
-        raise ValidationError(f"Error validating sub-department ID: {str(e)}")
+        raise ValidationError(f"{str(e)}")
 
 
 def validate_employee_id(employee_id: str) -> Dict:
@@ -159,11 +159,11 @@ def validate_employee_id(employee_id: str) -> Dict:
         else:
             logger.error(f"gRPC error validating employee: {e.code()} - {e.details()}")
             raise ValidationError(
-                f"Error validating employee ID: {e.details()}"
+                f"{e.details()}"
             )
     except Exception as e:
         logger.error(f"Unexpected error validating employee {employee_id}: {str(e)}")
-        raise ValidationError(f"Error validating employee ID: {str(e)}")
+        raise ValidationError(f"{str(e)}")
 
 
 def validate_user_id(user_id: str) -> Dict:
@@ -209,11 +209,11 @@ def validate_user_id(user_id: str) -> Dict:
         else:
             logger.error(f"gRPC error validating user: {e.code()} - {e.details()}")
             raise ValidationError(
-                f"Error validating user ID: {e.details()}"
+                f"{e.details()}"
             )
     except Exception as e:
         logger.error(f"Unexpected error validating user {user_id}: {str(e)}")
-        raise ValidationError(f"Error validating user ID: {str(e)}")
+        raise ValidationError(f"{str(e)}")
 
 
 def validate_branch_id(branch_id: str) -> Dict:
@@ -259,8 +259,8 @@ def validate_branch_id(branch_id: str) -> Dict:
         else:
             logger.error(f"gRPC error validating branch: {e.code()} - {e.details()}")
             raise ValidationError(
-                f"Error validating branch ID: {e.details()}"
+                f"{e.details()}"
             )
     except Exception as e:
         logger.error(f"Unexpected error validating branch {branch_id}: {str(e)}")
-        raise ValidationError(f"Error validating branch ID: {str(e)}")
+        raise ValidationError(f"{str(e)}")

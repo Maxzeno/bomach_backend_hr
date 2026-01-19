@@ -42,7 +42,7 @@ class DepartmentClient:
             timeout: Request timeout in seconds
         """
         self.host = host or getattr(settings, 'GRPC_SERVICE_HOST', 'localhost')
-        self.port = port or getattr(settings, 'GRPC_SERVICE_PORT', '50051')
+        self.port = port or getattr(settings, 'GRPC_SERVICE_PORT', '50052')
         self.timeout = timeout
         self._channel = None
         self._stub = None

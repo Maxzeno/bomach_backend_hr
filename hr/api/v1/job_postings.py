@@ -14,6 +14,7 @@ from hr.api.schemas import (
     MessageSchema,
 )
 
+from django.core.exceptions import ValidationError
 
 router = Router(tags=['Job Postings'])
 
@@ -65,15 +66,17 @@ def get_job_posting(request, job_posting_id: int):
     return job_posting
 
 
-@router.post('/', response={201: JobPostingResponseSchema})
+@router.post('/', response={201: JobPostingResponseSchema, 400: MessageSchema})
 def create_job_posting(request, payload: JobPostingCreateSchema):
     """
     Create a new job posting.
     """
-    data = payload.model_dump()
-    job_posting = JobPosting.objects.create(**data)
-    return 201, job_posting
-
+    try:
+        data = payload.model_dump()
+        job_posting = JobPosting.objects.create(**data)
+        return 201, job_posting
+    except ValidationError as e:
+        return 400, {'detail': e.messages[0]}
 
 @router.put('/{job_posting_id}', response=JobPostingResponseSchema)
 def update_job_posting(request, job_posting_id: int, payload: JobPostingUpdateSchema):

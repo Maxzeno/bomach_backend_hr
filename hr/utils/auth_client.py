@@ -1,12 +1,12 @@
 """
 Auth Client for HR Service
 
-This module provides utilities for communicating with the main auth backend.
-It supports both REST API calls and gRPC (when proto files are compiled).
+This module provides utilities for communicating with the main auth backend
+using gRPC for token validation and user information.
 
 Configuration:
-- Set AUTH_SERVICE_URL environment variable (default: http://localhost:8000)
-- Set AUTH_SERVICE_GRPC_HOST and AUTH_SERVICE_GRPC_PORT for gRPC
+- Set GRPC_SERVICE_HOST environment variable (default: localhost)
+- Set GRPC_SERVICE_PORT environment variable (default: 50052)
 
 Usage:
     from hr.utils.auth_client import AuthClient
@@ -22,10 +22,14 @@ Usage:
     employee_info = client.get_employee_info(employee_id)
 """
 
-import requests
+import logging
 from typing import Tuple, Optional, Dict, Any
-from functools import lru_cache
 from django.conf import settings
+
+from hr.grpc_clients.auth_client import AuthClient as GrpcAuthClient
+import grpc
+
+logger = logging.getLogger(__name__)
 
 
 class AuthClientError(Exception):
@@ -35,7 +39,7 @@ class AuthClientError(Exception):
 
 class AuthClient:
     """
-    Client for communicating with the main auth backend service.
+    Client for communicating with the main auth backend service using gRPC.
 
     This client provides methods for:
     - Token verification
@@ -45,35 +49,39 @@ class AuthClient:
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
-        timeout: int = 10
+        host: Optional[str] = None,
+        port: Optional[str] = None,
+        timeout: int = 5
     ):
         """
         Initialize the auth client.
 
         Args:
-            base_url: Base URL of the auth service (default from settings/env)
+            host: gRPC server host (default from settings or 'localhost')
+            port: gRPC server port (default from settings or '50052')
             timeout: Request timeout in seconds
         """
-        self.base_url = base_url or getattr(
-            settings, 'AUTH_SERVICE_URL',
-            'http://localhost:8000'
-        )
+        self.host = host
+        self.port = port
         self.timeout = timeout
-        self._session = None
+        self._grpc_client = None
 
     @property
-    def session(self) -> requests.Session:
-        """Lazy-loaded requests session for connection pooling."""
-        if self._session is None:
-            self._session = requests.Session()
-        return self._session
+    def grpc_client(self) -> GrpcAuthClient:
+        """Lazy-loaded gRPC client."""
+        if self._grpc_client is None:
+            self._grpc_client = GrpcAuthClient(
+                host=self.host,
+                port=self.port,
+                timeout=self.timeout
+            )
+        return self._grpc_client
 
     def close(self):
-        """Close the session."""
-        if self._session:
-            self._session.close()
-            self._session = None
+        """Close the gRPC client."""
+        if self._grpc_client:
+            self._grpc_client.close()
+            self._grpc_client = None
 
     def __enter__(self):
         return self
@@ -83,7 +91,7 @@ class AuthClient:
 
     def verify_token(self, token: str) -> Tuple[bool, Optional[int]]:
         """
-        Verify a JWT token with the auth service.
+        Verify a JWT token with the auth service using gRPC.
 
         Args:
             token: JWT access token (without 'Bearer ' prefix)
@@ -92,23 +100,30 @@ class AuthClient:
             Tuple of (is_valid, user_id). user_id is None if invalid.
         """
         try:
-            response = self.session.get(
-                f"{self.base_url}/api/v1/auth/verify-token",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=self.timeout
-            )
+            result = self.grpc_client.verify_token(token)
+            is_valid = result.get('valid', False)
+            user_id = result.get('user_id')
 
-            if response.status_code == 200:
-                data = response.json()
-                return True, data.get('user_id')
+            # Convert user_id to int if it's a string
+            if user_id and isinstance(user_id, str):
+                try:
+                    user_id = int(user_id)
+                except (ValueError, TypeError):
+                    logger.warning(f"Could not convert user_id to int: {user_id}")
+                    return False, None
+
+            return is_valid, user_id
+
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error verifying token: {e.code()} - {e.details()}")
             return False, None
-
-        except requests.RequestException:
+        except Exception as e:
+            logger.error(f"Unexpected error verifying token: {str(e)}")
             return False, None
 
     def get_current_user(self, token: str) -> Tuple[bool, Optional[Dict[str, Any]], str]:
         """
-        Get current user information from token.
+        Get current user information from token using gRPC.
 
         Args:
             token: JWT access token
@@ -117,48 +132,46 @@ class AuthClient:
             Tuple of (success, user_data, message)
         """
         try:
-            response = self.session.get(
-                f"{self.base_url}/api/v1/auth/me",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=self.timeout
-            )
+            result = self.grpc_client.verify_token(token)
+            is_valid = result.get('valid', False)
 
-            if response.status_code == 200:
-                return True, response.json(), "Success"
-            elif response.status_code == 401:
-                return False, None, "Invalid or expired token"
+            if is_valid:
+                user_data = result.get('user')
+                if user_data:
+                    return True, user_data, "Success"
+                else:
+                    return False, None, "User data not available"
             else:
-                return False, None, f"Error: {response.status_code}"
+                message = result.get('message', 'Invalid or expired token')
+                return False, None, message
 
-        except requests.RequestException as e:
-            return False, None, f"Connection error: {str(e)}"
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error getting current user: {e.code()} - {e.details()}")
+            return False, None, f"gRPC error: {e.details()}"
+        except Exception as e:
+            logger.error(f"Unexpected error getting current user: {str(e)}")
+            return False, None, f"Error: {str(e)}"
 
     def get_user_info(self, user_id: int, token: str) -> Optional[Dict[str, Any]]:
         """
-        Get user information by user ID.
-
-        Note: This requires an authenticated request.
+        Get user information by user ID using gRPC.
 
         Args:
             user_id: The user's ID
-            token: JWT access token for authentication
+            token: JWT access token for authentication (not used in gRPC call)
 
         Returns:
             Dict with user info if found, None otherwise
         """
         try:
-            # This endpoint may need to be implemented in the main backend
-            response = self.session.get(
-                f"{self.base_url}/api/v1/users/{user_id}",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=self.timeout
-            )
+            user_data = self.grpc_client.get_user(str(user_id))
+            return user_data
 
-            if response.status_code == 200:
-                return response.json()
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error getting user info: {e.code()} - {e.details()}")
             return None
-
-        except requests.RequestException:
+        except Exception as e:
+            logger.error(f"Unexpected error getting user info: {str(e)}")
             return None
 
     def get_employee_info(
@@ -167,42 +180,47 @@ class AuthClient:
         token: str
     ) -> Optional[Dict[str, Any]]:
         """
-        Get employee information by employee ID.
+        Get employee information by employee ID using gRPC.
 
         Args:
-            employee_id: The employee's ID (e.g., "EMP-001")
-            token: JWT access token for authentication
+            employee_id: The employee's ID (e.g., "EMP-001" or user ID)
+            token: JWT access token for authentication (not used in gRPC call)
 
         Returns:
             Dict with employee info if found, None otherwise
         """
         try:
-            response = self.session.get(
-                f"{self.base_url}/api/v1/employees/{employee_id}",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=self.timeout
-            )
+            employee_data = self.grpc_client.get_employee(employee_id)
+            return employee_data
 
-            if response.status_code == 200:
-                return response.json()
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error getting employee info: {e.code()} - {e.details()}")
             return None
-
-        except requests.RequestException:
+        except Exception as e:
+            logger.error(f"Unexpected error getting employee info: {str(e)}")
             return None
 
     def validate_employee_id(self, employee_id: str, token: str) -> bool:
         """
-        Check if an employee ID exists in the main backend.
+        Check if an employee ID exists in the main backend using gRPC.
 
         Args:
             employee_id: The employee ID to validate
-            token: JWT access token for authentication
+            token: JWT access token for authentication (not used in gRPC call)
 
         Returns:
             True if employee exists, False otherwise
         """
-        info = self.get_employee_info(employee_id, token)
-        return info is not None
+        try:
+            result = self.grpc_client.validate_employee(employee_id)
+            return result.get('exists', False)
+
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error validating employee: {e.code()} - {e.details()}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error validating employee: {str(e)}")
+            return False
 
 
 # Singleton instance for convenience

@@ -76,6 +76,53 @@ class AuthClient:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
+    def verify_token(self, token: str) -> Dict:
+        """
+        Verify a JWT token and return user information.
+
+        Args:
+            token: JWT token to verify
+
+        Returns:
+            dict: {
+                'valid': bool,
+                'user_id': str or None,
+                'user': dict or None,
+                'message': str
+            }
+
+        Raises:
+            grpc.RpcError: If the gRPC call fails
+        """
+        try:
+            request = auth_service_pb2.VerifyTokenRequest(token=token)
+            response = self.stub.VerifyToken(request, timeout=self.timeout)
+
+            user_data = None
+            if response.user and response.valid:
+                user_data = {
+                    'id': response.user.id,
+                    'email': response.user.email,
+                    'full_name': response.user.full_name,
+                    'username': response.user.username,
+                    'is_active': response.user.is_active,
+                    'created_at': response.user.created_at,
+                    'updated_at': response.user.updated_at,
+                }
+
+            logger.info(f"Token verification result: {response.valid}")
+
+            return {
+                'valid': response.valid,
+                'user_id': response.user_id if response.valid else None,
+                'user': user_data,
+                'message': response.message
+            }
+
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error verifying token: {e.code()} - {e.details()}")
+            raise
+
     def validate_employee(self, employee_id: str) -> Dict:
         """
         Validate that an employee ID exists and is active.

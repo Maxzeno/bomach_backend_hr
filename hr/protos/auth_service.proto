@@ -4,6 +4,9 @@ package auth;
 
 // Auth/User Service for validating and fetching user/employee data
 service AuthService {
+  // Verify JWT token and return user info
+  rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse);
+
   // Validate if a user/employee exists
   rpc ValidateUser(ValidateUserRequest) returns (ValidateUserResponse);
 
@@ -24,6 +27,18 @@ service AuthService {
 
   // Get branch details
   rpc GetBranch(GetBranchRequest) returns (Branch);
+}
+
+// Messages for Token verification
+message VerifyTokenRequest {
+  string token = 1;
+}
+
+message VerifyTokenResponse {
+  bool valid = 1;
+  string message = 2;
+  string user_id = 3;
+  User user = 4;
 }
 
 // Messages for User validation

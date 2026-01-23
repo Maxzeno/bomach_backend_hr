@@ -99,7 +99,7 @@ class OptionalAuthBearer(HttpBearer):
         def endpoint(request):
             if request.auth:
                 return {"user_id": request.auth}
-            return {"message": "Anonymous access"}
+            return {"detail": "Anonymous access"}
     """
 
     def authenticate(self, request: HttpRequest, token: str) -> Optional[int]:

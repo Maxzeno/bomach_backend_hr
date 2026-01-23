@@ -86,22 +86,6 @@ class AuthBearerWithUser(HttpBearer):
 
 
 class OptionalAuthBearer(HttpBearer):
-    """
-    Optional authentication - allows unauthenticated requests but
-    attaches user info if token is provided and valid.
-
-    Usage:
-        from hr.utils.auth import OptionalAuthBearer
-
-        router = Router(auth=OptionalAuthBearer())
-
-        @router.get("/public-with-optional-auth")
-        def endpoint(request):
-            if request.auth:
-                return {"user_id": request.auth}
-            return {"detail": "Anonymous access"}
-    """
-
     def authenticate(self, request: HttpRequest, token: str) -> Optional[int]:
         if not token:
             return None
